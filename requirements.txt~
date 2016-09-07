@@ -1,0 +1,13 @@
+Flask==0.11.1
+gunicorn==19.6.0
+Jinja2==2.8
+Werkzeug==0.11.10
+itsdangerous==0.24
+MarkupSafe==0.23
+oauth==1.0.1
+oauthlib==0.7.2
+requests==2.11.1
+Bokeh==0.12.0
+pandas==0.18.1
+numpy==1.11.1
+scipy==0.17.1
