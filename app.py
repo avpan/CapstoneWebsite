@@ -34,7 +34,27 @@ def tech():
   
 @app.route('/explore',methods=['GET','POST'])
 def explore():
-  return render_template('explore.html')    
+    features = [('goldDiff', 0.97447258779181267),
+    ('towerDiff', 0.97252165862046158),
+    ('killDiff', 0.92064016930097214),
+    ('inhibitorDiff', 0.91908603928311616),
+    ('towerKills', 0.90946365981085908),
+    ('firstInhibitor', 0.88066265458633686),
+    ('inhibitorKills', 0.79101911249255996),
+    ('dragonDiff', 0.7774948746776007),
+    ('dragonKills', 0.75332319291052174),
+    ('killTotal', 0.73473976588849943),
+    ('baronDiff', 0.71380861054163081),
+    ('baronKills', 0.71172541498578135),
+    ('firstTower', 0.70054890549566828),
+    ('firstBaron', 0.69922624165068448),
+    ('firstDragon', 0.67002843727266714),
+    ('goldTotal', 0.66199325441439061),
+    ('firstBlood', 0.58951127570927853),
+    ('firstRiftHerald', 0.54807883076516106),
+    ('riftHeraldKills', 0.54807883076516106),
+    ('gameLength', 0.5)]
+    return render_template('explore.html', features = features)    
 
 @app.route('/game',methods=['GET','POST'])
 def howto():
