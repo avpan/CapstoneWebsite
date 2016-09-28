@@ -64,7 +64,7 @@
            </tr>
         {% endfor %}
         </table>
-        <p class="lead"><img src="/static/pictures/scatter_matrix.png" width="75%"></p>
+        <p class="lead"><img src="/static/pictures/scatter_matrix.png" width="70%"></p>
         <p class ="lead" align = 'left'>We can see how the features relate to each other in a scatter matrix. There is large degree of collinearity between gold, kill, and tower difference. This is an issue for a linear regression. However, next steps are to combine these features into a random forest model. The forest model is less sensitive to collinearity. And a random forest model is useful as it can determine feature importance. I will then use a random forest to predict the winner of a game based on time intervals.</p>
         </div>
 </div><!-- /.container -->
