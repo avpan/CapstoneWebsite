@@ -57,14 +57,15 @@
         <p><img src="/static/pictures/golddiff.png" width="50%"></p>     
         <p class = 'lead' align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. Not many games are close games (<2000 gold differences).</p>
         <p class="lead" align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
-        <p alight='center'><table>
+        <table align = 'center'>
         {% for item in features %}
            <tr>
                <td> {{item}}</td>
            </tr>
         {% endfor %}
         </table>
-        </p>
+        <p class="lead"><img src="/static/pictures/scatter_matrix.png" width="100%"></p>
+        <p class ="lead">We can see how the features relate to each other in a scatter matrix. There is large degree of collinearity between gold, kill, and tower difference. This is an issue for a linear regression. However, next steps are to combine these features into a random forest model. The forest model is less sensitive to collinearity. And a random forest model is useful as it can determine feature importance. I will then use a random forest to predict the winner of a game based on time intervals.</p>
         </div>
 </div><!-- /.container -->
 
