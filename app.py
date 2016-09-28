@@ -1,5 +1,13 @@
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
+from bokeh.plotting import figure
+from bokeh.embed import components 
+from bokeh.io import gridplot
+import requests
+import pandas as pd
+import csv
+import datetime
+import numpy as py 
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -10,9 +18,13 @@ def main():
   
 @app.route('/about',methods=['GET','POST'])
 def about():
-  return render_template('about.html')    	
+  return render_template('about.html')    
+  
+@app.route('/contact',methods=['GET','POST'])
+def contact():
+  return render_template('contact.html')    		
     	  
-@app.route('/data',methods=['GET','POST'])
+@app.route('/getdata',methods=['GET','POST'])
 def data():
   return render_template('data.html')
     	
@@ -20,15 +32,14 @@ def data():
 def tech():
   return render_template('technology.html')
   
-@app.route('/gold',methods=['GET','POST'])
-def gold():
-  return render_template('histogram_golddiff.html')
-  
-@app.route('/time',methods=['GET','POST'])
-def time():
-  return render_template('histogram_gametime.html')
-  	
+@app.route('/explore',methods=['GET','POST'])
+def explore():
+  return render_template('explore.html')    
+
+@app.route('/game',methods=['GET','POST'])
+def howto():
+  return render_template('howto.html')      	
 
 if __name__ == '__main__':
-	#app.run()
-  app.run(debug=True)
+    app.run()
+  #app.run(debug=True)

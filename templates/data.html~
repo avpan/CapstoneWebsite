@@ -9,7 +9,7 @@
     <meta name="author" content="Alexander Pan" >
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Hextech H-Z20 Predictive Model</title>
 
     <!-- Bootstrap core CSS -->
     <link href="./static/bootstrap.min.css" rel="stylesheet">
@@ -29,15 +29,17 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/"> Capstone Project Name TBD</a>
+          <a class="navbar-brand" href="/">Hextech H-Z20 Predictive Model</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/">Home</a></li>
+            <li><a href="game">How to play</a></li>
             <li><a href="about">About</a></li>
             <li><a href="contact">Contact</a></li>
             <li><a href="technologies">Technologies</a></li>
-            <li><a href="data">Data</a></li>
+            <li><a href="getdata">Data</a></li>
+            <li><a href="explore">Exploratory Analysis</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -47,12 +49,13 @@
 
       <div class="starter-template">
         <h1>Data</h1>
+        <p class ="lead">My code to clean data can be found at this Juypter Notebook link</p>
         <p class="lead"> The data I use comes directly from Riot Games' League of Legends API in a json format. The full documentation can be located <a href="https://developer.riotgames.com/api/methods">here</a>. I am limited to 10 requests within 10 seconds.</p>
-        <p class="lead">The project uses a variation of a web crawler. The crawler begins with a specific summoner Id and finds a matchlist of matches the player has played recently. It chooses a random match within the list and stores the match in a Mongo database, which can later be used to extract the json files. In this match, it finds 9 different summoner Ids in the match and stores them into a list of summoner Ids. It deletes the summoner Id it used to find the match. This is to help minimize any duplicate matches. The steps are repeated to find matches for an inifinte amount of time until the crawler is stopped manually. </p>
-        <p class='lead'>From each match json file, the data contains important match metrics, such as but not limited to Time, Gold, Minions killed(known as CS), Kills, Deaths, Assists, and much more. Using this data, the project is allowed to analyze different metrics in order to accomplish its goal. </p>       
-      </div>
-
-    </div><!-- /.container -->
+        <p class="lead">I use a python module called LoLCrawler in order to gather my data through a spider crawl. The crawler begins with a specific summoner Id and finds a matchlist of matches the player has played recently. It chooses a random match within the list and stores the match in a Mongo database, which can later be used to extract the json files. In this match, it finds 9 different summoner Ids in the match and stores them into a list of summoner Ids. It deletes the summoner Id it used to find the match. This is to help minimize any duplicate matches. The steps are repeated to find matches for an inifinte amount of time until the crawler is stopped manually. </p>
+        <p class='lead'>The data I gather comes from patches 6.18 or greater. This includes important features that included first turret gold into the game. I take the data from the json file from the API. I then extract the needed features from the match, player, and team. I then store these into a separate csv file, which i can later use Pandas in order to run analysis. </p>   
+        <p class='lead'>Currently, I am analyzing <b>15,121</b> matches <b>(2.75 gb)</b> from the API. I have to ensure the game is reliable, as in full team and no afk (away from keyboard) players. More information on the analysis and data exploration can be found in this section</p>  
+       </div>
+</div><!-- /.container -->
 
 
     <!-- Bootstrap core JavaScript

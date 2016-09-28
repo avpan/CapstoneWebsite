@@ -9,7 +9,7 @@
     <meta name="author" content="Alexander Pan" >
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Hextech H-Z20 Predictive Model</title>
 
     <!-- Bootstrap core CSS -->
     <link href="./static/bootstrap.min.css" rel="stylesheet">
@@ -29,15 +29,17 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/"> Capstone Project Name TBD</a>
+          <a class="navbar-brand" href="/">Hextech H-Z20 Predictive Model</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="active"><a href="/">Home</a></li>
+            <li><a href="game">How to play</a></li>
             <li><a href="about">About</a></li>
             <li><a href="contact">Contact</a></li>
             <li><a href="technologies">Technologies</a></li>
-            <li><a href="data">Data</a></li>
+            <li><a href="getdata">Data</a></li>
+            <li><a href="explore">Exploratory Analysis</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -46,11 +48,11 @@
     <div class="container">
 
       <div class="starter-template">
-        <h1>About</h1>
-        
-       </div>
-
-    </div><!-- /.container -->
+        <h1>Data</h1>
+        <p class ="lead">My code to explore data can be found at this Juypter Notebook link</p>
+        <p class = "lead">For the initial exploratory analysis, I wanted to examine the distributions amoung the games of ceratin features</p>
+        </div>
+</div><!-- /.container -->
 
 
     <!-- Bootstrap core JavaScript
