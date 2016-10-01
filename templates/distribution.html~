@@ -55,40 +55,56 @@
         <div class=page>
           {{ div | safe }}
         </div>
-        <div><form id='input' method='post' action='distfunc'>	
-  			<p>
         <div>
-        <input type="checkbox" name='team' value='victory'/>
-        <span style="width:100px;display:inline-block;">Victory Team</span>
-        <input type="checkbox" name='team' value='defeat'/>
-        <span style="width:100px;display:inline-block;">Defeat Team</span>
-        </div>	
-        <select name="dist_feature">
-          <option value="gameLength">Game Duration</option>
-          <option value="goldTotal">Total Gold</option>
-          <option value="goldDiff">Gold Difference</option>
-          <option value="killTotal">Total Kills</option>
-          <option value="killDiff">Kill Difference</option>
-          <option value="towerKills">Towers Destroyed</option>
-          <option value="towerDiff">Tower Difference</option>
-          <option value="inhibitorKills">Inhibitor Destroyed</option>
-          <option value="inhibitorDiff">Inhibitor Difference</option>
-          <option value="dragonKills">Total Dragons</option>
-          <option value="dragonDiff">Dragon Difference</option>
-          <option value="baronKills">Total Barons</option>
-          <option value="baronDiff">Baron Difference</option>
-          <option value="riftHeraldKills">Rift Herald Kills</option>
-          <option value="firstBaron">First Baron</option>
-          <option value="firstDragon">First Dragon</option>
-          <option value="firstRiftHerald">First Rift Herald</option>
-          <option value="firstBlood">First Blood</option>
-          <option value="firstTower">First Tower</option>
-          <option value="firstInhibitor">First Inhibitor</option>
-          
-        </select>
-			<input type="submit" value="Submit">
-  			</p>
-		</form></div>
+            <form id='input' method='post' action='distfunc'>	
+      			<p align ='center'>
+                    <div>
+                        <input type="checkbox" name='team' value='victory'/>
+                        <span style="width:100px;display:inline-block;">Victory Team</span>
+                        <input type="checkbox" name='team' value='defeat'/>
+                        <span style="width:100px;display:inline-block;">Defeat Team</span>
+                    </div>	
+                    <div>
+                        <select name="dist_feature">
+                          <option value="gameLength">Game Duration</option>
+                          <option value="goldTotal">Total Gold</option>
+                          <option value="goldDiff">Gold Difference</option>
+                          <option value="killTotal">Total Kills</option>
+                          <option value="killDiff">Kill Difference</option>
+                          <option value="towerKills">Towers Destroyed</option>
+                          <option value="towerDiff">Tower Difference</option>
+                          <option value="inhibitorKills">Inhibitor Destroyed</option>
+                          <option value="inhibitorDiff">Inhibitor Difference</option>
+                          <option value="dragonKills">Total Dragons</option>
+                          <option value="dragonDiff">Dragon Difference</option>
+                          <option value="baronKills">Total Barons</option>
+                          <option value="baronDiff">Baron Difference</option>
+                          <option value="riftHeraldKills">Rift Herald Kills</option>
+                          <option value="firstBaron">First Baron</option>
+                          <option value="firstDragon">First Dragon</option>
+                          <option value="firstRiftHerald">First Rift Herald</option>
+                          <option value="firstBlood">First Blood</option>
+                          <option value="firstTower">First Tower</option>
+                          <option value="firstInhibitor">First Inhibitor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <span style="width:200px;display:inline-block;">
+                          <input type='range' name='binwidth' min'0' max='100' value='50' step='5' onchange='showValue(this.value)'/>
+                          <label for'binwidth'>Binwidth:</label>
+                          <span id='range'>50</span>
+                          <script type='text/javascript'>
+                          function showValue(newValue)
+                          {
+                          	document.getElementById("range").innerHTML=newValue;
+                          }
+                          </script>
+                          </span>
+                      </div>
+            			<input type="submit" value="Submit">
+      			</p>
+    		</form>
+		</div>
       </body>
         </div>
 </div><!-- /.container -->
