@@ -157,7 +157,7 @@ def distFunc():
         p.quad(top=hist2, bottom=0, left=edges2[:-1], right=edges2[1:], fill_alpha=.8, fill_color="firebrick", line_color="black", legend = 'Defeated Team')
     script, div = components(p)
     return render_template('distribution.html', script=script, div=div)
-'''
+
 @app.route('/scattermatrix',methods=['GET'])
 def scatterDefault():
     df = pd.read_csv("./static/prelim_data.csv",index_col=0)
@@ -189,7 +189,7 @@ def scatterMatrix():
             scatter = pd.scatter_matrix(red_team[features], alpha=.3,figsize=(size,size),diagonal=diagonal);
             plt.savefig('./static/pictures/scatter_matrix_plot.png')
     return render_template('scatter.html')   
-''' 
+
 if __name__ == '__main__':
     #app.run()
     app.run(debug=True)
