@@ -84,6 +84,28 @@ def explore():
 def howto():
   return render_template('howto.html')      	
   
+@app.route('/distfunc',methods=['GET'])
+def distFuncDefault():
+    metric = FEATURES['gameLength']
+    binwidth = 50
+    
+    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = df.astype(float)
+    df.reset_index(inplace=True,drop=True)
+    
+    #plotting in bokeh
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
+    
+    blue_team = df.iloc[::2]
+    feature_data = blue_team[['gameLength']]
+    mean = feature_data.mean()
+    std = feature_data.std()
+    p = figure(title="%s Distribution(μ=%.1f, σ=%.1f)"%(metric,mean,std),plot_width=900, plot_height=600, tools=TOOLS, x_axis_label = '%s' % metric, y_axis_label = '# Games')
+    hist,edges = np.histogram(feature_data,bins=binwidth)
+    p.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="dodgerblue", line_color="black", legend = 'Victorious Team')
+    script, div = components(p)
+    return render_template('distribution.html', script=script, div=div)
+    
 @app.route('/distfunc',methods=['POST'])
 def distFunc():
     if request.method == 'POST':
