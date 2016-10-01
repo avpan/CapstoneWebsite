@@ -117,10 +117,23 @@ def distFunc():
             std = feature_data.std()
             p = figure(title="%s Distribution(μ=%.1f, σ=%.1f)"%(metric,mean,std),plot_width=900, plot_height=600, tools=TOOLS, x_axis_label = '%s' % metric, y_axis_label = '# Games')
             hist,edges = np.histogram(feature_data,bins=binwidth)
-            p.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="firebrick", line_color="black", legend = 'Victorious Team')
-    #elif len(team) == 2:
-        script, div = components(p)
-        return render_template('distribution.html', script=script, div=div)
+            p.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="firebrick", line_color="black", legend = 'Defeated Team')
+    elif len(team) == 2:
+        blue_team = df.iloc[::2]
+        red_team = df.iloc[1::2]
+        victory = blue_team[[feature[0]]]
+        defeat = red_team[[feature[0]]]
+        victory_mean = victory.mean()
+        victory_std = victory.std()
+        defeat_mean = defeat.mean()
+        defeat_std = defeat.std()
+        p = figure(title="%s Distribution" % metric, plot_width=900,plot_height=600,tools=TOOLS,x_axis_label="%s" % metric, y_axis_label = "# Games")
+        hist1, edges1 = np.histogram(victory, bins=binwidth)
+        hist2, edges2 = np.histogram(defeat, bins=binwidth)
+        p.quad(top=hist1, bottom=0, left=edges1[:-1], right=edges1[1:], fill_color="dodgerblue", line_color="black", legend = 'Victorious Team')
+        p.quad(top=hist2, bottom=0, left=edges2[:-1], right=edges2[1:], fill_alpha=.2, fill_color="firebrick", line_color="black", legend = 'Defeated Team')
+    script, div = components(p)
+    return render_template('distribution.html', script=script, div=div)
 
 if __name__ == '__main__':
     #app.run()

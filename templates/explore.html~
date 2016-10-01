@@ -92,7 +92,8 @@
                       <option value="firstTower">First Tower</option>
                       <option value="firstInhibitor">First Inhibitor</option>
                     </select>
-                
+                </div>
+                <div>
                     <span style="width:200px;display:inline-block;">
                       <input type='range' name='binwidth' min'0' max='100' value='50' step='5' onchange='showValue(this.value)'/>
                       <label for'binwidth'>Binwidth:</label>
@@ -104,7 +105,7 @@
                       }
                       </script>
                       </span>
-                 </div>
+                  </div>
         			<input type="submit" value="Submit">
   			</p>
 		</form>
