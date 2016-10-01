@@ -52,7 +52,7 @@
       <div class="starter-template">
         <h1>Exploratory Analysis</h1>
         <p class ="lead"><b>My code to explore data can be found at these Juypter Notebook links: <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook1</a> and <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook2</a></b></p>
-        <p class = "lead" align 'left'><b>If you would like to explore the distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
+        <p class = 'lead' align ='left'><b>If you would like to explore the distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
         <form id='input' method='post' action='distfunc'>	
   			<p align ='center'>
                 <div>
@@ -109,6 +109,7 @@
             <p  align = 'left'>Next, I created a distribution of the gold difference between the winning and losing team at the end of a match. The mean gold difference = 11,090 gold. Below is a distribution of the gold difference,</p>   
             <p><img src="/static/pictures/golddiff.png" width="50%"></p>     
             <p  align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. A quesiton is raised, "Why aren't more games close (around 2000 gold difference)?</p> 
+            <p class = 'lead' align ='left'><b>Furthermore, if you would like to examine and interact with the averages of total gold earned by winning and losing teams and their gold differences as a function of the time within a game then follow the link <a href='/timeseries'>here.</a></b></p>
         </div>       
         <h3 align = 'left'>Naive Bayes</h3>
         <p align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
@@ -119,7 +120,7 @@
            </tr>
         {% endfor %}
         </table>
-        <p class = "lead" align 'left'><b>If you would like to explore what features to show in scatter matrix please select which features you would like to see. This will take you to a separate page:</b></p>
+        <p class = 'lead' align ='left'><b>If you would like to explore what features to show in scatter matrix please select which features you would like to see. This will take you to a separate page:</b></p>
         <form id='input' method='post' action='scattermatrix'>	
              <div>
                 <select name="team">
