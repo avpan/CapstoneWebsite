@@ -8,6 +8,9 @@
     <meta name="description" content="">
     <meta name="author" content="Alexander Pan" >
     <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
     <title>Hextech H-Z20 Predictive Model</title>
 
@@ -33,13 +36,13 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Home</a></li>
+            <li><a href="/">Home</a></li>
             <li><a href="game">How to play</a></li>
             <li><a href="about">About</a></li>
             <li><a href="contact">Contact</a></li>
             <li><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
-            <li><a href="explore">Exploratory Analysis</a></li>
+            <li class="active"><a href="explore">Exploratory Analysis</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -49,13 +52,64 @@
 
       <div class="starter-template">
         <h1>Exploratory Analysis</h1>
-        <p class ="lead"><b>My code to explore data can be found at this Juypter Notebook link</b></p>
+        <p class ="lead"><b>My code to explore data can be found at these Juypter Notebook links: <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook1</a> and <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook2</a></b></p>
         <p class = "lead" align='left'>For the initial exploratory analysis, I wanted to examine the distributions of the game durations and gold differences amount the games. Below is a distribution of the game durations, </p>
         <p><img src="/static/pictures/gameduration.png" width="50%"></p>
-        <p class = 'lead' align = 'left'>You can see from the distribution that there is a surge of games that end at 20 minute mark. This is because games become surrenderable at 20 minute mark as long as a team agrees to surrender. With that exception, the game lengths are normally distributed with a mean game length of 34 minutes and standard deviation of 8. According to Riot Games, the average game lasts between 25-35 minutes. There are few games below 20 minutes and quite a few games between 30 and 40 minutes.</p>
-        <p class = 'lead' align = 'left'>Next, I created a distribution of the gold difference between the winning and losing team at the end of a match. The mean gold difference = 11,090 gold with a standard deviation of 5204. Below is a distribution of the gold difference,</p>   
+        <p class = 'lead' align = 'left'>You can see from the distribution that there is a surge of games that end at 20 minute mark. This is because games become surrenderable at 20 minute mark as long as a team agrees to surrender. With that exception, the game lengths are normally distributed with a mean game length of 34 minutes. According to Riot Games, the average game lasts between 25-35 minutes.</p>
+        <p class = 'lead' align = 'left'>Next, I created a distribution of the gold difference between the winning and losing team at the end of a match. The mean gold difference = 11,090 gold. Below is a distribution of the gold difference,</p>   
         <p><img src="/static/pictures/golddiff.png" width="50%"></p>     
-        <p class = 'lead' align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. Not many games are close games (<2000 gold differences).</p>
+        <p class = 'lead' align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. A quesiton is raised, "Why aren't more games close (around 2000 gold difference)?</p>
+        
+        <p class = "lead" align 'left'><b>If you would like to explore more distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
+        <form id='input' method='post' action='distfunc'>	
+  			<p align ='center'>
+                <div>
+                    <input type="checkbox" name='team' value='victory'/>
+                    <span style="width:100px;display:inline-block;">Victory Team</span>
+                    <input type="checkbox" name='team' value='defeat'/>
+                    <span style="width:100px;display:inline-block;">Defeat Team</span>
+                </div>	
+                <div>
+                    <select name="dist_feature">
+                      <option value="gameLength">Game Duration</option>
+                      <option value="goldTotal">Total Gold</option>
+                      <option value="goldDiff">Gold Difference</option>
+                      <option value="killTotal">Total Kills</option>
+                      <option value="killDiff">Kill Difference</option>
+                      <option value="towerKills">Towers Destroyed</option>
+                      <option value="towerDiff">Tower Difference</option>
+                      <option value="inhibitorKills">Inhibitor Destroyed</option>
+                      <option value="inhibitorDiff">Inhibitor Difference</option>
+                      <option value="dragonKills">Total Dragons</option>
+                      <option value="dragonDiff">Dragon Difference</option>
+                      <option value="baronKills">Total Barons</option>
+                      <option value="baronDiff">Baron Difference</option>
+                      <option value="riftHeraldKills">Rift Herald Kills</option>
+                      <option value="firstBaron">First Baron</option>
+                      <option value="firstDragon">First Dragon</option>
+                      <option value="firstRiftHerald">First Rift Herald</option>
+                      <option value="firstBlood">First Blood</option>
+                      <option value="firstTower">First Tower</option>
+                      <option value="firstInhibitor">First Inhibitor</option>
+                    </select>
+                
+                    <span style="width:200px;display:inline-block;">
+                      <input type='range' name='binwidth' min'0' max='100' value='50' step='5' onchange='showValue(this.value)'/>
+                      <label for'binwidth'>Binwidth:</label>
+                      <span id='range'>50</span>
+                      <script type='text/javascript'>
+                      function showValue(newValue)
+                      {
+                      	document.getElementById("range").innerHTML=newValue;
+                      }
+                      </script>
+                      </span>
+                 </div>
+        			<input type="submit" value="Submit">
+  			</p>
+		</form>
+        
+        
         <p class="lead" align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
         <table align = 'center'>
         {% for item in features %}

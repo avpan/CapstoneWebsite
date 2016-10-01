@@ -8,7 +8,9 @@
     <meta name="description" content="">
     <meta name="author" content="Alexander Pan" >
     <link rel="icon" href="../../favicon.ico">
-
+    <link rel="stylesheet" href="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.css" type="text/css" />
+    <script type="text/javascript" src="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.js"></script>
+	{{ script | safe }}
     <title>Hextech H-Z20 Predictive Model</title>
 
     <!-- Bootstrap core CSS -->
@@ -16,6 +18,7 @@
 
     <!-- Custom styles for this template -->
     <link href="./static/starter-template.css" rel="stylesheet">
+    <a href="/">Back to Exploratory</a>
 </head>
 
   <body>
@@ -36,7 +39,7 @@
             <li><a href="/">Home</a></li>
             <li><a href="game">How to play</a></li>
             <li><a href="about">About</a></li>
-            <li class="active"><a href="contact">Contact</a></li>
+            <li><a href="contact">Contact</a></li>
             <li><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
             <li><a href="explore">Exploratory Analysis</a></li>
@@ -46,10 +49,47 @@
     </nav>
 
     <div class="container">
-
-      <div class="starter-template">
-        <h1>Contact</h1>
-        <p class ="lead">You can email me at dataincubator</p>
+        <div class="starter-template">
+        <h1>Distribution Plot</h1>
+      <body align='center'>
+        <div class=page>
+          {{ div | safe }}
+        </div>
+        <div><form id='input' method='post' action='distfunc'>	
+  			<p>
+        <div>
+        <input type="checkbox" name='team' value='victory'/>
+        <span style="width:100px;display:inline-block;">Victory Team</span>
+        <input type="checkbox" name='team' value='defeat'/>
+        <span style="width:100px;display:inline-block;">Defeat Team</span>
+        </div>	
+        <select name="dist_feature">
+          <option value="gameLength">Game Duration</option>
+          <option value="goldTotal">Total Gold</option>
+          <option value="goldDiff">Gold Difference</option>
+          <option value="killTotal">Total Kills</option>
+          <option value="killDiff">Kill Difference</option>
+          <option value="towerKills">Towers Destroyed</option>
+          <option value="towerDiff">Tower Difference</option>
+          <option value="inhibitorKills">Inhibitor Destroyed</option>
+          <option value="inhibitorDiff">Inhibitor Difference</option>
+          <option value="dragonKills">Total Dragons</option>
+          <option value="dragonDiff">Dragon Difference</option>
+          <option value="baronKills">Total Barons</option>
+          <option value="baronDiff">Baron Difference</option>
+          <option value="riftHeraldKills">Rift Herald Kills</option>
+          <option value="firstBaron">First Baron</option>
+          <option value="firstDragon">First Dragon</option>
+          <option value="firstRiftHerald">First Rift Herald</option>
+          <option value="firstBlood">First Blood</option>
+          <option value="firstTower">First Tower</option>
+          <option value="firstInhibitor">First Inhibitor</option>
+          
+        </select>
+			<input type="submit" value="Submit">
+  			</p>
+		</form></div>
+      </body>
         </div>
 </div><!-- /.container -->
 

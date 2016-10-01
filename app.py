@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
 from bokeh.plotting import figure
@@ -7,11 +9,30 @@ import requests
 import pandas as pd
 import csv
 import datetime
-import numpy as py 
+import numpy as np
 
 app = Flask(__name__)
 Bootstrap(app)
-
+FEATURES = {"gameLength": 'Game Duration', 
+                    "goldTotal": 'Total Gold',
+                    'goldDiff' : 'Gold Difference',
+                    'killTotal' : 'Total Kills',
+                    'killDiff' : 'Kill Difference',
+                    'towerKills' : 'Towers Destroyed',
+                    'towerDiff' : 'Tower Difference',
+                    'inhibitorKills': 'Inhibitors Destroyed',
+                    'inhibitorDiff':'Inhibitor Difference',
+                    'dragonKills' : 'Total Dragons',
+                    'dragonDiff' : 'Dragon Difference',
+                    'baronKills' : 'Total Barons',
+                    'riftHeraldKills' : 'Rift Herald Kills',
+                    'firstBaron' : 'First Baron',
+                    'firstDragon': 'First Dragon',
+                    'firstRiftHerald':'First Rift Herald',
+                    'firstBlood': 'First Blood',
+                    'firstTower': 'First Tower',
+                    'firstInhibitor':'First Inhibitor'}
+                    
 @app.route('/',methods=['GET','POST'])
 def main():
   return render_template('index.html')
@@ -34,32 +55,73 @@ def tech():
   
 @app.route('/explore',methods=['GET','POST'])
 def explore():
-    features = [('goldDiff', 0.97447258779181267),
-    ('towerDiff', 0.97252165862046158),
-    ('killDiff', 0.92064016930097214),
-    ('inhibitorDiff', 0.91908603928311616),
-    ('towerKills', 0.90946365981085908),
-    ('firstInhibitor', 0.88066265458633686),
-    ('inhibitorKills', 0.79101911249255996),
-    ('dragonDiff', 0.7774948746776007),
-    ('dragonKills', 0.75332319291052174),
-    ('killTotal', 0.73473976588849943),
-    ('baronDiff', 0.71380861054163081),
-    ('baronKills', 0.71172541498578135),
-    ('firstTower', 0.70054890549566828),
-    ('firstBaron', 0.69922624165068448),
-    ('firstDragon', 0.67002843727266714),
-    ('goldTotal', 0.66199325441439061),
-    ('firstBlood', 0.58951127570927853),
-    ('firstRiftHerald', 0.54807883076516106),
-    ('riftHeraldKills', 0.54807883076516106),
-    ('gameLength', 0.5)]
-    return render_template('explore.html', features = features)    
+    if request.method == 'GET':
+        features = [('goldDiff', 0.97447258779181267),
+        ('towerDiff', 0.97252165862046158),
+        ('killDiff', 0.92064016930097214),
+        ('inhibitorDiff', 0.91908603928311616),
+        ('towerKills', 0.90946365981085908),
+        ('firstInhibitor', 0.88066265458633686),
+        ('inhibitorKills', 0.79101911249255996),
+        ('dragonDiff', 0.7774948746776007),
+        ('dragonKills', 0.75332319291052174),
+        ('killTotal', 0.73473976588849943),
+        ('baronDiff', 0.71380861054163081),
+        ('baronKills', 0.71172541498578135),
+        ('firstTower', 0.70054890549566828),
+        ('firstBaron', 0.69922624165068448),
+        ('firstDragon', 0.67002843727266714),
+        ('goldTotal', 0.66199325441439061),
+        ('firstBlood', 0.58951127570927853),
+        ('firstRiftHerald', 0.54807883076516106),
+        ('riftHeraldKills', 0.54807883076516106),
+        ('gameLength', 0.5)]
+        return render_template('explore.html', features = features)    
+    else:
+        return redirect('/distfunc')
 
 @app.route('/game',methods=['GET','POST'])
 def howto():
   return render_template('howto.html')      	
+  
+@app.route('/distfunc',methods=['POST'])
+def distFunc():
+    if request.method == 'POST':
+        redirect('/distfunc')   
+    feature = request.form.getlist('dist_feature')
+    team = request.form.getlist('team')   
+    bin = request.form.getlist('binwidth')
+    metric = FEATURES[feature[0]]
+    binwidth = int(bin[0])
+    
+    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = df.astype(float)
+    df.reset_index(inplace=True,drop=True)
+    hist,edges = [],[]
+    #plotting in bokeh
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
+    if len(team) == 1:
+        if team[0] == 'victory':
+            blue_team = df.iloc[::2]
+            feature_data = blue_team[[feature[0]]]
+            mean = feature_data.mean()
+            std = feature_data.std()
+            p = figure(title="%s Distribution(μ=%.1f, σ=%.1f)"%(metric,mean,std),plot_width=900, plot_height=600, tools=TOOLS, x_axis_label = '%s' % metric, y_axis_label = '# Games')
+            hist,edges = np.histogram(feature_data,bins=binwidth)
+            p.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="dodgerblue", line_color="black", legend = 'Victorious Team')
+            
+        else:
+            red_team = df.iloc[1::2]
+            feature_data = red_team[[feature[0]]]
+            mean = feature_data.mean()
+            std = feature_data.std()
+            p = figure(title="%s Distribution(μ=%.1f, σ=%.1f)"%(metric,mean,std),plot_width=900, plot_height=600, tools=TOOLS, x_axis_label = '%s' % metric, y_axis_label = '# Games')
+            hist,edges = np.histogram(feature_data,bins=binwidth)
+            p.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="firebrick", line_color="black", legend = 'Defeated Team')
+    #elif len(team) == 2:
+        script, div = components(p)
+        return render_template('distribution.html', script=script, div=div)
 
 if __name__ == '__main__':
-    app.run()
-  #app.run(debug=True)
+    #app.run()
+    app.run(debug=True)
