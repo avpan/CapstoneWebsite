@@ -178,7 +178,7 @@ def scatterMatrix():
     features = request.form.getlist('features')
     diagonal = request.form.getlist('diagonal')
     diagonal = diagonal[0]
-    size = len(features)+8
+    size = len(features)+7
     if len(team) == 1:
         if team[0] == 'victory':
             blue_team = df.iloc[::2]
