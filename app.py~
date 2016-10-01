@@ -10,6 +10,7 @@ import pandas as pd
 import csv
 import datetime
 import numpy as np
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -32,7 +33,7 @@ FEATURES = {"gameLength": 'Game Duration',
                     'firstBlood': 'First Blood',
                     'firstTower': 'First Tower',
                     'firstInhibitor':'First Inhibitor'}
-                    
+
 @app.route('/',methods=['GET','POST'])
 def main():
   return render_template('index.html')
@@ -41,6 +42,10 @@ def main():
 def about():
   return render_template('about.html')    
   
+@app.route('/game',methods=['GET','POST'])
+def howto():
+  return render_template('howto.html')    
+    
 @app.route('/contact',methods=['GET','POST'])
 def contact():
   return render_template('contact.html')    		
@@ -77,12 +82,8 @@ def explore():
         ('riftHeraldKills', 0.54807883076516106),
         ('gameLength', 0.5)]
         return render_template('explore.html', features = features)    
-    else:
-        return redirect('/distfunc')
-
-@app.route('/game',methods=['GET','POST'])
-def howto():
-  return render_template('howto.html')      	
+    #else:
+        #return redirect('/distfunc')  	
   
 @app.route('/distfunc',methods=['GET'])
 def distFuncDefault():
@@ -97,7 +98,7 @@ def distFuncDefault():
     TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
     
     blue_team = df.iloc[::2]
-    feature_data = blue_team[[feature[0]]]
+    feature_data = blue_team[['gameLength']]
     mean = feature_data.mean()
     std = feature_data.std()
     p = figure(title="%s Distribution(μ=%.1f, σ=%.1f)"%(metric,mean,std),plot_width=900, plot_height=600, tools=TOOLS, x_axis_label = '%s' % metric, y_axis_label = '# Games')
@@ -157,6 +158,37 @@ def distFunc():
     script, div = components(p)
     return render_template('distribution.html', script=script, div=div)
 
+@app.route('/scattermatrix',methods=['GET'])
+def scatterDefault():
+    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = df.astype(float)
+    df.reset_index(inplace=True,drop=True)
+    blue_team = df.iloc[::2]
+    scatter = pd.scatter_matrix(blue_team[['goldDiff','towerDiff','killDiff','inhibitorDiff']], alpha=.3,figsize=(12,12),diagonal='hist');
+    plt.savefig(r'./static/pictures/scatter_matrix_plot.png')
+    return render_template('scatter.html')    
+      
+@app.route('/scattermatrix',methods=['POST'])
+def scatterMatrix():
+    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = df.astype(float)
+    df.reset_index(inplace=True,drop=True)
+    
+    team = request.form.getlist('team')
+    features = request.form.getlist('features')
+    diagonal = request.form.getlist('diagonal')
+    diagonal = diagonal[0]
+    
+    if len(team) == 1:
+        if team[0] == 'victory':
+            blue_team = df.iloc[::2]
+            scatter = pd.scatter_matrix(blue_team[features], alpha=.3,figsize=(12,12),diagonal=diagonal);
+            plt.savefig('./static/pictures/scatter_matrix_plot.png')
+        else:
+            red_team = df.iloc[1::2]
+            scatter = pd.scatter_matrix(red_team[features], alpha=.3,figsize=(12,12),diagonal=diagonal);
+            plt.savefig('./static/pictures/scatter_matrix_plot.png')
+    return render_template('scatter.html')    
 if __name__ == '__main__':
     #app.run()
     app.run(debug=True)

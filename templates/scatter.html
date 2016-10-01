@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="Alexander Pan" >
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.css" type="text/css" />
+    <script type="text/javascript" src="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.js"></script>
+   
+	<title>Hextech H-Z20 Predictive Model</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./static/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="./static/starter-template.css" rel="stylesheet">
+    <a href="/explore">Back to Exploratory</a>
+</head>
+
+  <body onload="updateImage()">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Hextech H-Z20 Predictive Model</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="game">How to play</a></li>
+            <li><a href="about">About</a></li>
+            <li><a href="contact">Contact</a></li>
+            <li><a href="technologies">Technologies</a></li>
+            <li><a href="getdata">Data</a></li>
+            <li><a href="explore">Exploratory Analysis</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+        <div class="starter-template">
+        <h1>Scatter Matrix</h1>
+      <body align='center'>
+        <div class=page>
+          <p><img src="./static/pictures/scatter_matrix_plot.png" width="70%" id="scatter"></p>
+        </div>
+        <div>
+            <form id='input' method='post' action='scattermatrix'>
+             <div>
+                <select name="team">
+                      <option value="victory">Victorious Team</option>
+                      <option value="defeat">Defeated Team</option>
+           `    </select>
+                <select name="diagonal">
+                      <option value="hist">hist</option>
+                      <option value="kde">kde</option>
+           `    </select>
+             </div>	
+  			<div>
+                <input type="checkbox" name='features' value='goldDiff'/><span style="width:100px;display:inline-block;">Gold Difference</span>
+                <input type="checkbox" name='features' value='towerDiff'/><span style="width:150px;display:inline-block;">Tower Difference</span>
+                <input type="checkbox" name='features' value='killDiff'/><span style="width:100px;display:inline-block;">Kill Difference</span>  
+                <input type="checkbox" name='features' value='inhibitorDiff'/><span style="width:150px;display:inline-block;">Inhibitor Difference</span>            
+             </div>
+             <div>
+                <input type="checkbox" name='features' value='towerKills'/><span style="width:150px;display:inline-block;">Towers Destroyed</span>
+                <input type="checkbox" name='features' value='firstInhibitor'/><span style="width:100px;display:inline-block;">First Inhibitor</span>
+                <input type="checkbox" name='features' value='inhibitorKills'/><span style="width:150px;display:inline-block;">Inhibitors Destroyed</span>
+                <input type="checkbox" name='features' value='dragonDiff'/><span style="width:150px;display:inline-block;">Dragon Difference</span>
+                <input type="checkbox" name='features' value='dragonKills'/><span style="width:150px;display:inline-block;">Total Dragons</span>
+             </div>
+             <div>
+                <input type="checkbox" name='features' value='killTotal'/><span style="width:100px;display:inline-block;">Kill Total</span> 
+                <input type="checkbox" name='features' value='baronKills'/><span style="width:150px;display:inline-block;">Total Barons</span>
+                <input type="checkbox" name='features' value='baronDiff'/><span style="width:150px;display:inline-block;">Baron Difference</span>
+                <input type="checkbox" name='features' value='firstTower'/><span style="width:100px;display:inline-block;">First Tower</span>
+             </div>
+            <div>
+                <input type="checkbox" name='features' value='firstBaron'/><span style="width:100px;display:inline-block;">First Baron</span>
+                <input type="checkbox" name='features' value='firstDragon'/><span style="width:100px;display:inline-block;">First Dragon</span>
+                <input type="checkbox" name='features' value='goldTotal'/><span style="width:100px;display:inline-block;">Gold Total</span>
+                <input type="checkbox" name='features' value='firstBlood'/><span style="width:100px;display:inline-block;">First Blood</span>
+                <input type="checkbox" name='features' value='riftHeraldKills'/><span style="width:150px;display:inline-block;">Rift Herald Kills</span>
+                <input type="checkbox" name='features' value='gameLength'/><span style="width:100px;display:inline-block;">Game Duration</span>
+             </div>
+             <script type="text/javascript">
+               function updateImage() {
+                    var d = new Date();
+                    document.getElementById("scatter").src="./static/pictures/scatter_matrix_plot.png?a="+d.getTime();
+                    }
+            </script>
+             <input type="submit" value="Submit" onclick="updateImage()">
+		</form>
+		</div>
+      </body>
+        </div>
+</div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="./static/js/tests/vendor/jquery.min.js"><\/script>')</script>
+    <script src="./static/js/bootstrap.min.js"></script>
+  </body>
+</html>

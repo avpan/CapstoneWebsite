@@ -22,7 +22,6 @@
 </head>
 
   <body>
-
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -53,14 +52,7 @@
       <div class="starter-template">
         <h1>Exploratory Analysis</h1>
         <p class ="lead"><b>My code to explore data can be found at these Juypter Notebook links: <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook1</a> and <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook2</a></b></p>
-        <p class = "lead" align='left'>For the initial exploratory analysis, I wanted to examine the distributions of the game durations and gold differences amount the games. Below is a distribution of the game durations, </p>
-        <p><img src="/static/pictures/gameduration.png" width="50%"></p>
-        <p class = 'lead' align = 'left'>You can see from the distribution that there is a surge of games that end at 20 minute mark. This is because games become surrenderable at 20 minute mark as long as a team agrees to surrender. With that exception, the game lengths are normally distributed with a mean game length of 34 minutes. According to Riot Games, the average game lasts between 25-35 minutes.</p>
-        <p class = 'lead' align = 'left'>Next, I created a distribution of the gold difference between the winning and losing team at the end of a match. The mean gold difference = 11,090 gold. Below is a distribution of the gold difference,</p>   
-        <p><img src="/static/pictures/golddiff.png" width="50%"></p>     
-        <p class = 'lead' align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. A quesiton is raised, "Why aren't more games close (around 2000 gold difference)?</p>
-        
-        <p class = "lead" align 'left'><b>If you would like to explore more distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
+        <p class = "lead" align 'left'><b>If you would like to explore the distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
         <form id='input' method='post' action='distfunc'>	
   			<p align ='center'>
                 <div>
@@ -109,9 +101,17 @@
         			<input type="submit" value="Submit">
   			</p>
 		</form>
-        
-        
-        <p class="lead" align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
+		<div>
+		    <h2 align='left'>Distribution Analysis</h2>
+            <p  align='left'>For the initial exploratory analysis, I wanted to examine the distributions of the game durations and gold differences amount the games. Below is a distribution of the game durations, </p>
+            <p><img src="/static/pictures/gameduration.png" width="50%"></p>
+            <p  align = 'left'>You can see from the distribution that there is a surge of games that end at 20 minute mark. This is because games become surrenderable at 20 minute mark as long as a team agrees to surrender. With that exception, the game lengths are normally distributed with a mean game length of 34 minutes. According to Riot Games, the average game lasts between 25-35 minutes.</p>
+            <p  align = 'left'>Next, I created a distribution of the gold difference between the winning and losing team at the end of a match. The mean gold difference = 11,090 gold. Below is a distribution of the gold difference,</p>   
+            <p><img src="/static/pictures/golddiff.png" width="50%"></p>     
+            <p  align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. A quesiton is raised, "Why aren't more games close (around 2000 gold difference)?</p> 
+        </div>       
+        <h3 align = 'left'>Naive Bayes</h3>
+        <p align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
         <table align = 'center'>
         {% for item in features %}
            <tr>
@@ -119,8 +119,49 @@
            </tr>
         {% endfor %}
         </table>
-        <p class="lead"><img src="/static/pictures/scatter_matrix.png" width="70%"></p>
-        <p class ="lead" align = 'left'>We can see how the features relate to each other in a scatter matrix. There is large degree of collinearity between gold, kill, and tower difference. This is an issue for a linear regression. However, next steps are to combine these features into a random forest model. The forest model is less sensitive to collinearity. And a random forest model is useful as it can determine feature importance. I will then use a random forest to predict the winner of a game based on time intervals.</p>
+        <p class = "lead" align 'left'><b>If you would like to explore what features to show in scatter matrix please select which features you would like to see. This will take you to a separate page:</b></p>
+        <form id='input' method='post' action='scattermatrix'>	
+             <div>
+                <select name="team">
+                      <option value="victory">Victorious Team</option>
+                      <option value="defeat">Defeated Team</option>
+           `    </select>
+                <select name="diagonal">
+                      <option value="hist">hist</option>
+                      <option value="kde">kde</option>
+           `    </select>
+  			<div>
+                <input type="checkbox" name='features' value='goldDiff'/><span style="width:100px;display:inline-block;">Gold Difference</span>
+                <input type="checkbox" name='features' value='towerDiff'/><span style="width:100px;display:inline-block;">Tower Difference</span>
+                <input type="checkbox" name='features' value='killDiff'/><span style="width:100px;display:inline-block;">Kill Difference</span>  
+                <input type="checkbox" name='features' value='inhibitorDiff'/><span style="width:150px;display:inline-block;">Inhibitor Difference</span>            
+             </div>
+             <div>
+                <input type="checkbox" name='features' value='towerKills'/><span style="width:100px;display:inline-block;">Towers Destroyed</span>
+                <input type="checkbox" name='features' value='firstInhibitor'/><span style="width:100px;display:inline-block;">First Inhibitor</span>
+                <input type="checkbox" name='features' value='inhibitorKills'/><span style="width:150px;display:inline-block;">Inhibitors Destroyed</span>
+                <input type="checkbox" name='features' value='dragonDiff'/><span style="width:150px;display:inline-block;">Dragon Difference</span>
+                <input type="checkbox" name='features' value='dragonKills'/><span style="width:100px;display:inline-block;">Total Dragons</span>
+             </div>
+             <div>
+                <input type="checkbox" name='features' value='killTotal'/><span style="width:100px;display:inline-block;">Kill Total</span> 
+                <input type="checkbox" name='features' value='baronKills'/><span style="width:100px;display:inline-block;">Total Barons</span>
+                <input type="checkbox" name='features' value='baronDiff'/><span style="width:150px;display:inline-block;">Baron Difference</span>
+                <input type="checkbox" name='features' value='firstTower'/><span style="width:100px;display:inline-block;">First Tower</span>
+             </div>
+            <div>
+                <input type="checkbox" name='features' value='firstBaron'/><span style="width:100px;display:inline-block;">First Baron</span>
+                <input type="checkbox" name='features' value='firstDragon'/><span style="width:100px;display:inline-block;">First Dragon</span>
+                <input type="checkbox" name='features' value='goldTotal'/><span style="width:100px;display:inline-block;">Gold Total</span>
+                <input type="checkbox" name='features' value='firstBlood'/><span style="width:100px;display:inline-block;">First Blood</span>
+                <input type="checkbox" name='features' value='riftHeraldKills'/><span style="width:150px;display:inline-block;">Rift Herald Kills</span>
+                <input type="checkbox" name='features' value='gameLength'/><span style="width:100px;display:inline-block;">Game Duration</span>
+             </div>
+             <input type="submit" value="Submit">
+		</form>
+		<p align='left'>The top 4 accurate features are shown in a scatter matrix below</p>
+        <p><img src="/static/pictures/scatter_matrix.png" width="70%"></p>
+        <p  align = 'left'>We can see how the features relate to each other in a scatter matrix. There is large degree of collinearity between gold, kill, and tower difference. This is an issue for a linear regression. However, next steps are to combine these features into a random forest model. The forest model is less sensitive to collinearity. And a random forest model is useful as it can determine feature importance. I will then use a random forest to predict the winner of a game based on time intervals.</p>
         </div>
 </div><!-- /.container -->
 
