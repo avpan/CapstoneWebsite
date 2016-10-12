@@ -2,23 +2,28 @@
 
 from flask import Flask, render_template, request, redirect
 from flask_bootstrap import Bootstrap
-from bokeh.plotting import figure
+from bokeh.plotting import figure, show, output_file
 from bokeh.embed import components 
 from bokeh.io import gridplot,vplot
 from bokeh.models import Legend,BoxSelectTool,HoverTool
+from bokeh.charts import HeatMap, output_file, show
+from bokeh.palettes import YlOrRd3,YlOrRd4,YlOrRd5
+from bokeh.resources import CDN
+from bokeh.embed import file_html
 import requests
 import pandas as pd
 import csv
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
+import dill
 
 app = Flask(__name__)
 Bootstrap(app)
 FEATURES = {"gameLength": 'Game Duration', 
                     "goldTotal": 'Total Gold',
                     'goldDiff' : 'Gold Difference',
-                    'killTotal' : 'Total Kills',
+                    'killTotal' : 'Total Champion Kills',
                     'killDiff' : 'Kill Difference',
                     'towerKills' : 'Towers Destroyed',
                     'towerDiff' : 'Tower Difference',
@@ -26,7 +31,8 @@ FEATURES = {"gameLength": 'Game Duration',
                     'inhibitorDiff':'Inhibitor Difference',
                     'dragonKills' : 'Total Dragons',
                     'dragonDiff' : 'Dragon Difference',
-                    'baronKills' : 'Total Barons',
+                    'baronKills' : 'Total Baron Nashors',
+                    'baronDiff': 'Baron Nashor Difference',
                     'riftHeraldKills' : 'Rift Herald Kills',
                     'firstBaron' : 'First Baron',
                     'firstDragon': 'First Dragon',
@@ -34,7 +40,10 @@ FEATURES = {"gameLength": 'Game Duration',
                     'firstBlood': 'First Blood',
                     'firstTower': 'First Tower',
                     'firstInhibitor':'First Inhibitor'}
-
+                    
+with open('./static/randomforestmodel_esports.pkl','rb') as infile:
+        forest = dill.load(infile)  
+        
 @app.route('/',methods=['GET','POST'])
 def main():
   return render_template('index.html')
@@ -82,10 +91,27 @@ def explore():
         ('firstRiftHerald', 0.54807883076516106),
         ('riftHeraldKills', 0.54807883076516106),
         ('gameLength', 0.5)]
-        return render_template('explore.html', features = features)    
-    #else:
-        #return redirect('/distfunc')  	
-  
+        
+        #heatmap feature importance
+        feature_df = pd.read_csv("./static/feature_importances.csv",index_col=0)
+        cols = list(feature_df.columns)
+        cols.pop()
+        TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
+        hover = HoverTool(tooltips=[("(feature,time,importance)", "(@x, @y, @values)")]) 
+        feature_importances = pd.melt(feature_df,id_vars=['time'],value_vars=cols,var_name='Features',value_name='Importance')
+        hm = HeatMap(feature_importances,x='Features',y='time',values='Importance',stat=None,width=900,height=500,
+                                palette=YlOrRd5,legend='top_right',tools=[TOOLS,hover],title='Feature Importance')
+        html = file_html(hm, CDN)
+        
+        score_df = pd.read_csv('./static/predictionaccuracy.csv',index_col=0)
+        TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
+        hover1 = HoverTool(tooltips=[("time", "$index"),("(time, accuracy) (x,y)", "(@x, @y)")]) 
+        p = figure(title = 'Prediction Accuracy',plot_width=900,plot_height=500,tools=[TOOLS,hover1],x_axis_label='Time(minutes)',y_axis_label='Accuracy Score')
+        p.line(score_df['time'],score_df['accuracyScore'],line_width=2,color='mediumpurple')
+        p.circle(score_df['time'],score_df['accuracyScore'],color='indigo',size=5)
+        script, div = components(p)
+        return render_template('explore.html', plot=html,script=script,div=div)    
+
 @app.route('/distfunc',methods=['GET'])
 def distFuncDefault():
     metric = FEATURES['gameLength']
@@ -96,8 +122,7 @@ def distFuncDefault():
     df.reset_index(inplace=True,drop=True)
     
     #plotting in bokeh
-    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
-    
+    TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"    
     blue_team = df.iloc[::2]
     feature_data = blue_team[['gameLength']]
     mean = feature_data.mean()
@@ -195,84 +220,72 @@ def scatterMatrix():
 def timeSeriesDefault():    
     df = pd.read_csv("./static/prelim_fulltimedata.csv",index_col=0)
     df = df.astype(int)
+    winner_df = df[df['winner'] == 1]
+    loser_df = df[df['winner']== 0]
     maxtime = df['time'].max()
-    results = []
+    victory = []
     for timestamp in range(maxtime+1):
-        dft = df[df['time']==timestamp]
+        dft = winner_df[winner_df['time']==timestamp]
         if dft.shape[0] <= 50:
             continue
-        winGoldTotal = round(dft['winGoldTotal'].mean())
-        loseGoldTotal = round(dft['loseGoldTotal'].mean())
-        winChampKills = round(dft['winChampKills'].mean())
-        loseChampKills = round(dft['loseChampKills'].mean())
-        winTowerKills = round(dft['winTowerKills'].mean())
-        loseTowerKills = round(dft['loseTowerKills'].mean())
-        winInhibKills = round(dft['winInhibKills'].mean())
-        loseInhibKills = round(dft['loseInhibKills'].mean())
-        winDragonKills = round(dft['winDragonKills'].mean())
-        loseDragonKills = round(dft['loseDragonKills'].mean())
-        winBaronKills = round(dft['winBaronKills'].mean())
-        loseBaronKills = round(dft['loseBaronKills'].mean())
-        winRiftKills = round(dft['winRiftKills'].mean())
-        loseRiftKills = round(dft['loseRiftKills'].mean())
-        winFirstBlood = round(dft['winFirstBlood'].mean())
-        loseFirstBlood = round(dft['loseFirstBlood'].mean())
-        winFirstTower = round(dft['winFirstTower'].mean())
-        loseFirstTower = round(dft['loseFirstTower'].mean())
-        winFirstInhib = round(dft['winFirstInhib'].mean())
-        loseFirstInhib = round(dft['loseFirstInhib'].mean())
-        winFirstDragon = round(dft['winFirstDragon'].mean())
-        loseFirstDragon = round(dft['loseFirstDragon'].mean())
-        winFirstBaron = round(dft['winFirstBaron'].mean())
-        loseFirstBaron = round(dft['loseFirstBaron'].mean())
-        winFirstRift = round(dft['winFirstRift'].mean())
-        loseFirstRift = round(dft['loseFirstRift'].mean())
-        results.append((timestamp,winGoldTotal,loseGoldTotal,winChampKills,loseChampKills, winTowerKills,loseTowerKills,winInhibKills,loseInhibKills,winDragonKills, loseDragonKills,winBaronKills, loseBaronKills,winRiftKills,loseRiftKills,   winFirstBlood,loseFirstBlood,winFirstTower,loseFirstTower,winFirstInhib,loseFirstInhib,winFirstDragon, loseFirstDragon,winFirstBaron,loseFirstBaron,winFirstRift,loseFirstRift))
-        
-    dft = pd.DataFrame(results,columns=['time', 
-                                                                'winGoldTotal',
-                                                                'loseGoldTotal', 
-                                                                'winChampKills',
-                                                                'loseChampKills',
-                                                                'winTowerKills',
-                                                                'loseTowerKills',
-                                                                'winInhibKills',
-                                                                'loseInhibKills',
-                                                                'winDragonKills',
-                                                                'loseDragonKills',
-                                                                'winBaronKills',
-                                                                'loseBaronKills',
-                                                                'winRiftKills',
-                                                                'loseRiftKills',
-                                                                'winFirstBlood',
-                                                                'loseFirstBlood',
-                                                                'winFirstTower',
-                                                                'loseFirstTower',
-                                                                'winFirstInhib',
-                                                                'loseFirstInhib',
-                                                                'winFirstDragon',
-                                                                'loseFirstDragon',
-                                                                'winFirstBaron',
-                                                                'loseFirstBaron',
-                                                                'winFirstRift',
-                                                                'loseFirstRift'])
-                                               
+        goldTotal = round(dft['goldTotal'].mean())
+        champKills = round(dft['champKills'].mean())
+        towerKills = round(dft['towerKills'].mean())
+        inhibKills = round(dft['inhibKills'].mean())
+        dragonKills = round(dft['dragonKills'].mean())
+        baronKills = round(dft['baronKills'].mean())
+        riftKills = round(dft['riftKills'].mean())
+        firstBlood = round(dft['firstBlood'].mean())
+        firstTower = round(dft['firstTower'].mean())
+        firstInhib = round(dft['firstInhib'].mean())
+        firstDragon = round(dft['firstDragon'].mean())
+        firstBaron = round(dft['firstBaron'].mean())
+        firstRift = round(dft['firstRift'].mean())
+        victory.append((1,timestamp,goldTotal,champKills,towerKills,inhibKills,dragonKills,baronKills,
+                        riftKills,firstBlood,firstTower,firstInhib,firstDragon,firstBaron,firstRift))
+    
+    defeat = []
+    for timestamp in range(maxtime+1):
+        dft = loser_df[loser_df['time']==timestamp]
+        if dft.shape[0] <= 50:
+            continue
+        goldTotal = round(dft['goldTotal'].mean())
+        champKills = round(dft['champKills'].mean())
+        towerKills = round(dft['towerKills'].mean())
+        inhibKills = round(dft['inhibKills'].mean())
+        dragonKills = round(dft['dragonKills'].mean())
+        baronKills = round(dft['baronKills'].mean())
+        riftKills = round(dft['riftKills'].mean())
+        firstBlood = round(dft['firstBlood'].mean())
+        firstTower = round(dft['firstTower'].mean())
+        firstInhib = round(dft['firstInhib'].mean())
+        firstDragon = round(dft['firstDragon'].mean())
+        firstBaron = round(dft['firstBaron'].mean())
+        firstRift = round(dft['firstRift'].mean())
+        defeat.append((0,timestamp,goldTotal,champKills,towerKills,inhibKills,dragonKills,baronKills,
+                        riftKills,firstBlood,firstTower,firstInhib,firstDragon,firstBaron,firstRift))
+
+    dft1 = pd.DataFrame(victory,columns=['winner','time','goldTotal', 'killTotal','towerKills','inhibitorKills','dragonKills','baronKills',
+                                       'riftHeraldKills','firstBlood','firstTower','firstInhibitor','firstDragon','firstBaron','firstRiftHerald'])
+    dft2 = pd.DataFrame(defeat,columns=['winner','time','goldTotal', 'killTotal','towerKills','inhibitorKills','dragonKills','baronKills',
+                                           'riftHeraldKills','firstBlood','firstTower','firstInhibitor','firstDragon','firstBaron','firstRiftHerald'])
+
     TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
     hover = HoverTool(tooltips=[("time", "$index"),("(time, value) (x,y)", "(@x, @y)")]) 
     p = figure(title="Average Gold Total", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover],x_axis_label="Time (minutes)", y_axis_label = "Gold Total")
-    time = dft['time']
-    p1 = p.line(time,dft['winGoldTotal'],line_width=2,color='dodgerblue')
-    p2 = p.circle(time,dft['winGoldTotal'],color='blue',size=5)
-    legend = Legend(legends=[('Victorious Team',[p1,p2])], location=(0,-30))
+    time = dft1['time']
+    p1 = p.line(time,dft1['goldTotal'],line_width=2,color='dodgerblue')
+    p2 = p.circle(time,dft1['goldTotal'],color='blue',size=5)
+    p3 = p.line(time,dft2['goldTotal'],line_width=2,color='firebrick')
+    p4 = p.circle(time,dft2['goldTotal'],color='red',size=5)
+    legend = Legend(legends=[('Victorious Team',[p1,p2]),('Defeat Team',[p3,p4])], location=(0,-30))
     p.add_layout(legend,'left')
     
     hover2 = HoverTool(tooltips=[("time", "$index"),("(time, value) (x,y)", "(@x, @y)")]) 
     s = figure(title="Average Gold Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Gold Difference")
-    featDiff = dft['winGoldTotal']-dft['loseGoldTotal']
+    featDiff = dft1['goldTotal']-dft2['goldTotal']
     s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
     s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-    #s.add_tools(BoxSelectTool(),hover)  
-    
     vertPlot =vplot(p,s) 
     script, div = components(vertPlot)
     return render_template('timeseries.html',div=div,script=script)    
@@ -281,100 +294,87 @@ def timeSeriesDefault():
 def timeSeries():
     df = pd.read_csv("./static/prelim_fulltimedata.csv",index_col=0)
     df = df.astype(int)
-    
+    winner_df = df[df['winner'] == 1]
+    loser_df = df[df['winner']==0]
     maxtime = df['time'].max()
-    results = []
+    victory, defeat = [],[]
     
     feature = request.form.getlist('features')
     feature = feature[0]
     team = request.form.getlist('team')
     for timestamp in range(maxtime+1):
-        dft = df[df['time']==timestamp]
+        dft = winner_df[winner_df['time']==timestamp]
         if dft.shape[0] <= 50:
             continue
-        winGoldTotal = round(dft['winGoldTotal'].mean())
-        loseGoldTotal = round(dft['loseGoldTotal'].mean())
-        winChampKills = round(dft['winChampKills'].mean())
-        loseChampKills = round(dft['loseChampKills'].mean())
-        winTowerKills = round(dft['winTowerKills'].mean())
-        loseTowerKills = round(dft['loseTowerKills'].mean())
-        winInhibKills = round(dft['winInhibKills'].mean())
-        loseInhibKills = round(dft['loseInhibKills'].mean())
-        winDragonKills = round(dft['winDragonKills'].mean())
-        loseDragonKills = round(dft['loseDragonKills'].mean())
-        winBaronKills = round(dft['winBaronKills'].mean())
-        loseBaronKills = round(dft['loseBaronKills'].mean())
-        winRiftKills = round(dft['winRiftKills'].mean())
-        loseRiftKills = round(dft['loseRiftKills'].mean())
-        winFirstBlood = round(dft['winFirstBlood'].mean())
-        loseFirstBlood = round(dft['loseFirstBlood'].mean())
-        winFirstTower = round(dft['winFirstTower'].mean())
-        loseFirstTower = round(dft['loseFirstTower'].mean())
-        winFirstInhib = round(dft['winFirstInhib'].mean())
-        loseFirstInhib = round(dft['loseFirstInhib'].mean())
-        winFirstDragon = round(dft['winFirstDragon'].mean())
-        loseFirstDragon = round(dft['loseFirstDragon'].mean())
-        winFirstBaron = round(dft['winFirstBaron'].mean())
-        loseFirstBaron = round(dft['loseFirstBaron'].mean())
-        winFirstRift = round(dft['winFirstRift'].mean())
-        loseFirstRift = round(dft['loseFirstRift'].mean())
-        results.append((timestamp,winGoldTotal,loseGoldTotal,winChampKills,loseChampKills, winTowerKills,loseTowerKills,winInhibKills,loseInhibKills,winDragonKills, loseDragonKills,winBaronKills, loseBaronKills,winRiftKills,loseRiftKills,   winFirstBlood,loseFirstBlood,winFirstTower,loseFirstTower,winFirstInhib,loseFirstInhib,winFirstDragon, loseFirstDragon,winFirstBaron,loseFirstBaron,winFirstRift,loseFirstRift))
-        
-    dft = pd.DataFrame(results,columns=['time', 
-                                                                'winGoldTotal',
-                                                                'loseGoldTotal', 
-                                                                'winChampKills',
-                                                                'loseChampKills',
-                                                                'winTowerKills',
-                                                                'loseTowerKills',
-                                                                'winInhibKills',
-                                                                'loseInhibKills',
-                                                                'winDragonKills',
-                                                                'loseDragonKills',
-                                                                'winBaronKills',
-                                                                'loseBaronKills',
-                                                                'winRiftKills',
-                                                                'loseRiftKills',
-                                                                'winFirstBlood',
-                                                                'loseFirstBlood',
-                                                                'winFirstTower',
-                                                                'loseFirstTower',
-                                                                'winFirstInhib',
-                                                                'loseFirstInhib',
-                                                                'winFirstDragon',
-                                                                'loseFirstDragon',
-                                                                'winFirstBaron',
-                                                                'loseFirstBaron',
-                                                                'winFirstRift',
-                                                                'loseFirstRift'])
+        goldTotal = round(dft['goldTotal'].mean())
+        champKills = round(dft['champKills'].mean())
+        towerKills = round(dft['towerKills'].mean())
+        inhibKills = round(dft['inhibKills'].mean())
+        dragonKills = round(dft['dragonKills'].mean())
+        baronKills = round(dft['baronKills'].mean())
+        riftKills = round(dft['riftKills'].mean())
+        firstBlood = round(dft['firstBlood'].mean())
+        firstTower = round(dft['firstTower'].mean())
+        firstInhib = round(dft['firstInhib'].mean())
+        firstDragon = round(dft['firstDragon'].mean())
+        firstBaron = round(dft['firstBaron'].mean())
+        firstRift = round(dft['firstRift'].mean())
+        victory.append((1,timestamp,goldTotal,champKills,towerKills,inhibKills,dragonKills,baronKills,
+                        riftKills,firstBlood,firstTower,firstInhib,firstDragon,firstBaron,firstRift))
+
+    for timestamp in range(maxtime+1):
+        dft = loser_df[loser_df['time']==timestamp]
+        if dft.shape[0] <= 50:
+            continue
+        goldTotal = round(dft['goldTotal'].mean())
+        champKills = round(dft['champKills'].mean())
+        towerKills = round(dft['towerKills'].mean())
+        inhibKills = round(dft['inhibKills'].mean())
+        dragonKills = round(dft['dragonKills'].mean())
+        baronKills = round(dft['baronKills'].mean())
+        riftKills = round(dft['riftKills'].mean())
+        firstBlood = round(dft['firstBlood'].mean())
+        firstTower = round(dft['firstTower'].mean())
+        firstInhib = round(dft['firstInhib'].mean())
+        firstDragon = round(dft['firstDragon'].mean())
+        firstBaron = round(dft['firstBaron'].mean())
+        firstRift = round(dft['firstRift'].mean())
+        defeat.append((0,timestamp,goldTotal,champKills,towerKills,inhibKills,dragonKills,baronKills,
+                        riftKills,firstBlood,firstTower,firstInhib,firstDragon,firstBaron,firstRift))
+                                
+    dft1 = pd.DataFrame(victory,columns=['winner','time','goldTotal', 'killTotal','towerKills','inhibitorKills','dragonKills','baronKills',
+                                       'riftHeraldKills','firstBlood','firstTower','firstInhibitor','firstDragon','firstBaron','firstRiftHerald'])
+    dft2 = pd.DataFrame(defeat,columns=['winner','time','goldTotal', 'killTotal','towerKills','inhibitorKills','dragonKills','baronKills',
+                                           'riftHeraldKills','firstBlood','firstTower','firstInhibitor','firstDragon','firstBaron','firstRiftHerald'])
+
+                                           
     TOOLS = "pan,wheel_zoom,box_zoom,reset,resize"
     hover1 = HoverTool(tooltips=[("time", "$index"),("(time, value) (x,y)", "(@x, @y)")]) 
     hover2 = HoverTool(tooltips=[("time", "$index"),("(time, value) (x,y)", "(@x, @y)")]) 
-    time = dft['time']
+    time = dft1['time']
     
     f1,color1,color2,name = 0,'','',''
-    if feature == 'goldTotal':
+    if 'first' not in feature:
         if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
+            dft,color1,color2,name =[],'','',''
             if team[0] == 'victory':
-                f1 = dft['winGoldTotal']
                 color1 = 'dodgerblue'
                 color2 = 'blue'
-                name = 'Victorious Team'
+                name = 'Victorious Team'       
+                dft = dft1[feature]     
             else:
-                f1 = dft['loseGoldTotal']
                 color1 = 'firebrick'
                 color2 = 'red'
                 name = 'Defeat Team'
-                
-            p = figure(title="Average Gold Total", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Gold Total")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
+                dft = dft2[feature]
+            p = figure(title="Average %s" % FEATURES[feature], plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "%s" % FEATURES[feature])    
+            p1 = p.line(time,dft,line_width=2,color=color1)
+            p2 = p.circle(time,dft,color=color2,size=5)
             legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
+            p.add_layout(legend,'left')  
             
-            s = figure(title="Average Gold Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Gold Difference")
-            featDiff = dft['winGoldTotal']-dft['loseGoldTotal']
+            s = figure(title="Average %s Difference" % FEATURES[feature], plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "%s Difference" % FEATURES[feature])
+            featDiff = dft1[feature]-dft2[feature]
             s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
             s2 = s.circle(time,featDiff,line_width=2,color='indigo')
             
@@ -382,531 +382,107 @@ def timeSeries():
             script, div = components(vertPlot)
             return render_template('timeseries.html',div=div,script=script)            
         else:
-            f1 = dft['winGoldTotal']
-            f2 = dft['loseGoldTotal']
-            p = figure(title="Average Gold Total", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Gold Total")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
+            p = figure(title="Average %s" % FEATURES[feature], plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "%s" % FEATURES[feature])
+            p1 = p.line(time,dft1[feature],line_width=2,color='dodgerblue')
+            p2 = p.circle(time,dft1[feature],color='blue',size=5)
+            p3 = p.line(time,dft2[feature],line_width=2,color='firebrick')
+            p4 = p.circle(time,dft2[feature],color='red',size=5)
             legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
             p.add_layout(legend,'left')    
             
-            s = figure(title="Average Gold Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Gold Difference")
-            featDiff = f1 - f2
+            s = figure(title="Average %s Difference" % FEATURES[feature], plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "%s Difference" % FEATURES[feature])
+            featDiff = dft1[feature]-dft2[feature]
             s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
             s2 = s.circle(time,featDiff,line_width=2,color='indigo')
             
             vertPlot =vplot(p,s) 
             script, div = components(vertPlot)
             return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------
-    elif feature == 'killTotal':
+    else:
         if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
+            dft,color1,color2,name =[],'','',''
             if team[0] == 'victory':
-                f1 = dft['winChampKills']
                 color1 = 'dodgerblue'
                 color2 = 'blue'
-                name = 'Victorious Team'
+                name = 'Victorious Team'       
+                dft = dft1[feature]     
             else:
-                f1 = dft['loseChampKills']
                 color1 = 'firebrick'
                 color2 = 'red'
                 name = 'Defeat Team'
+                dft = dft2[feature]
                 
-            p = figure(title="Average Champion Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Champion Kills")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
+            p = figure(title="Average %s" % FEATURES[feature], plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "%s (1=True, 0=False)" % FEATURES[feature])    
+            p1 = p.line(time,dft,line_width=2,color=color1)
+            p2 = p.circle(time,dft,color=color2,size=5)
             legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Champion Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = dft['winChampKills']-dft['loseChampKills']
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winChampKills']
-            f2 = dft['loseChampKills']
-            p = figure(title="Average Champion Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Champion Kills")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = f1-f2
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
+            p.add_layout(legend,'left')  
+            script,div = components(p)
             return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'towerTotal':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winTowerKills']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseTowerKills']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="Average Tower Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Tower Kills")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Tower Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = dft['winTowerKills']-dft['loseTowerKills']
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winTowerKills']
-            f2 = dft['loseTowerKills']
-            p = figure(title="Average Tower Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Tower Kills")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
+        else:  
+            p = figure(title="Average %s" % FEATURES[feature], plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "%s (1=True, 0=False)" % FEATURES[feature])
+            p1 = p.line(time,dft1[feature],line_width=2,color='dodgerblue')
+            p2 = p.circle(time,dft1[feature],color='blue',size=5)
+            p3 = p.line(time,dft2[feature],line_width=2,color='firebrick')
+            p4 = p.circle(time,dft2[feature],color='red',size=5)
             legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
+            p.add_layout(legend,'left')  
+            script,div = components(p)
+            return render_template('timeseries.html',div=div,script=script)    
             
-            s = figure(title="Average Tower Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = f1-f2
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'inhibTotal':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winInhibKills']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseInhibKills']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="Average Inhibitor Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Inhibitor Kills")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Inhibitor Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = dft['winInhibKills']-dft['loseInhibKills']
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)            
+@app.route('/predictor',methods=['GET'])
+def predictor():                          
+    return render_template('predictor.html')
+
+@app.route('/predictor',methods=['POST'])
+def predictorPost():        
+    goldTotal = request.form.getlist('goldTotal')
+    champKills = request.form.getlist('champKills')
+    towerKills = request.form.getlist('towerKills')
+    inhibKills = request.form.getlist('inhibKills')
+    dragonKills = request.form.getlist('dragonKills')
+    baronKills = request.form.getlist('baronKills')
+    predictTeam = request.form.getlist('predictTeam')[0]
+    firstBlood = request.form.getlist('firstBlood')
+    firstTower = request.form.getlist('firstTower')
+    #print request.form.getlist('firstBlood'), request.form.getlist('firstTower')
+    if predictTeam == 'blue':
+        team1 = 0
+        team2 = 1
+        if firstBlood == 'blue':
+            firstBlood = 1
         else:
-            f1 = dft['winInhibKills']
-            f2 = dft['loseInhibKills']
-            p = figure(title="Average Inhibitor Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Inhibitor Kills")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Inhibitor Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = f1-f2
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'dragonTotal':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winDragonKills']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseDragonKills']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="Average Dragon Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Dragon Kills")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Dragon Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = dft['winDragonKills']-dft['loseDragonKills']
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)            
+            firstBlood = 0
+        if firstTower == 'blue':
+            firstTower = 1
         else:
-            f1 = dft['winDragonKills']
-            f2 = dft['loseDragonKills']
-            p = figure(title="Average Dragon Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Dragon Kills")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Dragon Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = f1-f2
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'baronTotal':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winBaronKills']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseBaronKills']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="Average Baron Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Baron Kills")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Baron Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = dft['winBaronKills']-dft['loseBaronKills']
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)            
+            firstTower = 0       
+    else:
+        team1 = 1
+        team2 = 0
+        if firstBlood == 'red':
+            firstBlood = 1
         else:
-            f1 = dft['winBaronKills']
-            f2 = dft['loseBaronKills']
-            p = figure(title="Average Baron Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Baron Kills")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Baron Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = f1-f2
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'riftTotal':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winRiftKills']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseRiftKills']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="Average Rift Herald Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Rift Herald Kills")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Rift Herald Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = dft['winRiftKills']-dft['loseRiftKills']
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)            
+            firstBlood = 0
+        if firstTower == 'red':
+            firstTower = 1
         else:
-            f1 = dft['winRiftKills']
-            f2 = dft['loseRiftKills']
-            p = figure(title="Average Rift Herald Kills", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "Rift Herald Kills")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            s = figure(title="Average Rift Herald Kill Difference", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover2],x_axis_label="Time (minutes)", y_axis_label = "Kill Difference")
-            featDiff = f1-f2
-            s1 = s.line(time,featDiff,line_width=2,color='mediumpurple')
-            s2 = s.circle(time,featDiff,line_width=2,color='indigo')
-            
-            vertPlot =vplot(p,s) 
-            script, div = components(vertPlot)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'firstBlood':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winFirstBlood']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseFirstBlood']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="First Blood", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Blood (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winFirstBlood']
-            f2 = dft['loseFirstBlood']
-            p = figure(title="First Blood", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Blood (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'firstTower':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winFirstTower']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseFirstTower']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="First Tower", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Tower (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winFirstTower']
-            f2 = dft['loseFirstTower']
-            p = figure(title="First Tower", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Tower (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'firstInhib':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winFirstInhib']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseFirstInhib']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="First Inhibitor", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Inhibitor (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winFirstInhib']
-            f2 = dft['loseFirstInhib']
-            p = figure(title="First Inhibitor", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Inhibitor (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'firstDragon':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winFirstDragon']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseFirstDragon']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="First Dragon", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Dragon (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winFirstDragon']
-            f2 = dft['loseFirstDragon']
-            p = figure(title="First Dragon", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Dragon (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'firstBaron':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winFirstBaron']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseFirstBaron']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="First Baron", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Baron (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winFirstBaron']
-            f2 = dft['loseFirstBaron']
-            p = figure(title="First Baron", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Baron (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)
-    #--------------------------------------------------------------------------------    
-    elif feature == 'firstRift':
-        if len(team) == 1:
-            f1,color1,color2,name = 0,'','',''
-            if team[0] == 'victory':
-                f1 = dft['winFirstRift']
-                color1 = 'dodgerblue'
-                color2 = 'blue'
-                name = 'Victorious Team'
-            else:
-                f1 = dft['loseFirstRift']
-                color1 = 'firebrick'
-                color2 = 'red'
-                name = 'Defeat Team'
-                
-            p = figure(title="First Rift Herald", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Rift Herald (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color=color1)
-            p2 = p.circle(time,f1,color=color2,size=5)
-            legend = Legend(legends=[(name,[p1,p2])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)            
-        else:
-            f1 = dft['winFirstRift']
-            f2 = dft['loseFirstRift']
-            p = figure(title="First Rift Herald", plot_width=900,plot_height=300,tools=[TOOLS,BoxSelectTool(),hover1],x_axis_label="Time (minutes)", y_axis_label = "First Rift Herald (1=Yes or 0=No)")
-            p1 = p.line(time,f1,line_width=2,color='dodgerblue')
-            p2 = p.circle(time,f1,color='blue',size=5)
-            p3 = p.line(time,f2,line_width=2,color='firebrick')
-            p4 = p.circle(time,f2,color='red',size=5)
-            legend = Legend(legends=[('Victorious Team',[p1,p2]), ('Defeat Team',[p3,p4])], location=(0,-30))
-            p.add_layout(legend,'left')    
-            
-            script, div = components(p)
-            return render_template('timeseries.html',div=div,script=script)
+            firstTower = 0    
         
- 
     
+    goldDiff = int(goldTotal[team1]) - int(goldTotal[team2])
+    killDiff = int(champKills[team1]) - int(champKills[team2])
+    towerDiff = int(towerKills[team1]) - int(towerKills[team2])
+    inhibDiff = int(inhibKills[team1]) - int(inhibKills[team2])
+    dragonDiff = int(dragonKills[team1]) - int(dragonKills[team2])
+    baronDiff = int(baronKills[team1]) - int(baronKills[team2])
+    
+    features =[(goldTotal[team1],goldDiff,champKills[team1],killDiff,towerKills[team1],towerDiff,inhibKills[team1],inhibDiff,dragonKills[team1],dragonDiff,baronKills[team1],baronDiff,firstBlood,firstTower)]
+    features_df = pd.DataFrame(features,columns=['goldTotal','goldDiff','champKills','killDiff','towerKills','towerDiff','inhibKills','inhibDiff','dragonKills', 'dragonDiff','baronKills','baronDiff','firstBlood','firstTower'])
+    winner = forest.predict(features_df)
+    win_percent = forest.score(features_df,[1])
+    print win_percent,winner
+    return render_template('predictor.html')
 if __name__ == '__main__':
     #app.run()
     app.run(debug=True)

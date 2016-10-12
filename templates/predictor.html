@@ -35,7 +35,7 @@
           <ul class="nav navbar-nav">
             <li><a href="/">Home</a></li>
             <li><a href="game">How to play</a></li>
-            <li class="active"><a href="about">About</a></li>
+            <li><a href="about">About</a></li>
             <li><a href="contact">Contact</a></li>
             <li><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
@@ -50,8 +50,59 @@
 
       <div class="starter-template">
         <h1>Predictor</h1>
-        </div>
-
+            <p class ='lead' align='center'>Please enter in the data for Blue and Red Teams</p>
+             <form id='input' method='post' action='predictor'>	
+                <h2 align='left'>Blue Team</h2>
+                      <div align='left'>
+                          <span>Gold Total: </span>
+                          <input type="text" name="goldTotal" id='blue' maxlength="6" size="6" value=2500 />
+                          <span>Champions Killed: </span>
+                          <input type="text" name="champKills" id='blue' maxlength="2" size="2" value=0 />
+                          <span>Towers Destroyed: </span>
+                          <input type="text" name="towerKills" id='blue' maxlength="2" size="2" value=0 />
+                          <span>Inhibitors Destroyed: </span>
+                          <input type="text" name="inhibKills" id='blue' maxlength="2" size="2" value=0 />
+                          <span>Dragons Killed: </span>
+                          <input type="text" name="dragonKills" id='blue' maxlength="2" size="2" value=0 />
+                          <span>Baron Nashors Killed: </span>
+                          <input type="text" name="baronKills" id='blue' maxlength="2" size="2" value=0 />
+                      </div>
+                      <div align = 'left'>
+                        <input type="checkbox" name='firstBlood' value='blue'/>
+                        <span style="width:100px;display:inline-block;">First Blood</span>
+                        <input type="checkbox" name='firstTower' value='blue'/>
+                        <span style="width:100px;display:inline-block;">First Tower</span>
+                      </div>
+                <h2 align='left'>Red Team</h2>
+                   <div align='left'>
+                          <span>Gold Total: </span>
+                          <input type="text" name="goldTotal" id='red' maxlength="6" size="6" value=2500 />
+                          <span>Champions Killed: </span>
+                          <input type="text" name="champKills" id='red' maxlength="2" size="2" value=0 />
+                          <span>Towers Destroyed: </span>
+                          <input type="text" name="towerKills" id='red' maxlength="2" size="2" value=0 />
+                          <span>Inhibitors Destroyed: </span>
+                          <input type="text" name="inhibKills" id='red' maxlength="2" size="2" value=0 />
+                          <span>Dragons Killed: </span>
+                          <input type="text" name="dragonKills" id='red' maxlength="2" size="2" value=0 />
+                          <span>Baron Nashors Killed: </span>
+                          <input type="text" name="baronKills" id='red' maxlength="2" size="2" value=0 />
+                      </div>
+                      <div align = 'left'>
+                        <input type="checkbox" name='firstBlood' value='red'/>
+                        <span style="width:100px;display:inline-block;">First Blood</span>
+                        <input type="checkbox" name='firstTower' value='red'/>
+                        <span style="width:100px;display:inline-block;">First Tower</span>
+                      </div>
+                 <h4 align = 'left'>Choose a team to predict their win percentage</h4>
+                     <div align = 'left'>
+                        <select name="predictTeam">
+                              <option value="blue">Blue Team</option>
+                              <option value="red">Red Team</option>
+                     </div>
+                  <input type="submit" value="Submit"/>
+             </form>
+      </div>
     </div><!-- /.container -->
 
 

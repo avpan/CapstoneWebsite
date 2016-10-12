@@ -12,7 +12,7 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.js"></script>
-	{{ script | safe }}
+	{{ script|safe}}
 	<title>Hextech H-Z20 Predictive Model</title>
 
     <!-- Bootstrap core CSS -->
@@ -165,9 +165,13 @@
         <p><img src="/static/pictures/scatter_matrix.png" width="70%"></p>
         <p  align = 'left'>We can see how the features relate to each other in a scatter matrix. There is large degree of collinearity between gold, kill, and tower difference. This is an issue for a linear regression. However, next steps are to combine these features into a random forest model. The forest model is less sensitive to collinearity. And a random forest model is useful as it can determine feature importance. I will then use a random forest to predict the winner of a game based on time intervals.</p>
         <h2 align = 'left'>Time Series of Feature Averages</h2>
-        <div><p align ='left'><b>If you would like to examine and interact with the averages of certain features by winning and losing teams as a function of the time within a game then follow the link <a href='/timeseries'>here</a> and choose which features to explore.</b></p></div>
-        <h2 align='left'>Random Forest Model</h2>      
-        <iframe width="100%" frameborder="0" src="./templates/heatmap.html" height="400"></iframe>
+        <div><h3><p align ='left'><b>If you would like to examine and interact with the averages of certain features by winning and losing teams as a function of the time within a game then follow the link <a href='/timeseries'>here</a> and choose which features to explore.</b></p></h3></div>
+        <h2 align='left'>Random Forest Model</h2>     
+         <div align='left'>{{plot | safe}}</div></div>
+         <p align='left'>I looked at the several features in a match and created a random forest model. I then visualize them into a heatmap with respect to the match time with their importance as the value. As one can see, the gold difference is the most important feature throughout the entire match time. It is no surprise that the other important features include the tower and inhibitor differences, as each of these go directly into winning a match.</p> 
+         <div align='left'>{{div|safe}}</div>
+         <p align = 'left'>Finally, I showed the accuracy of the predictions with my test data. Between 25-35 minutes, the accuracy of the prediction is at its highest. From the start of a match towards 30+ minutes, the prediction accuracy grows but starts decreasing after this point. The game becomes much harder to predict the winner with the quantitative data. This can be due to the fact that as a game duration increases the main feature, gold difference, becomes less significant. The features start to be less important because the later games are determined based on the skill of the players, which is harder to quantify.</p>
+         <p align='left'>My predictor model, which can be located <a href="/predictor">here</a>, is focusing on using the features that one can easily observe by watching a game of League of Legends. The matches analyzed range from several different players from rank Bronze to Professional.</p>
 </div><!-- /.container -->
 
 
