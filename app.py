@@ -41,8 +41,8 @@ FEATURES = {"gameLength": 'Game Duration',
                     'firstTower': 'First Tower',
                     'firstInhibitor':'First Inhibitor'}
                     
-with open('./static/randomforestmodel_esports.pkl','rb') as infile:
-        forest = dill.load(infile)  
+#with open('./static/randomforestmodel_esports.pkl','rb') as infile:
+        #forest = dill.load(infile)  
         
 @app.route('/',methods=['GET','POST'])
 def main():

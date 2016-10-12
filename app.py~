@@ -481,7 +481,7 @@ def predictorPost():
     features_df = pd.DataFrame(features,columns=['goldTotal','goldDiff','champKills','killDiff','towerKills','towerDiff','inhibKills','inhibDiff','dragonKills', 'dragonDiff','baronKills','baronDiff','firstBlood','firstTower'])
     winner = forest.predict(features_df)
     win_percent = forest.score(features_df,[1])
-    #print win_percent,winner
+    print win_percent,winner
     return render_template('predictor.html')
 if __name__ == '__main__':
     #app.run()
