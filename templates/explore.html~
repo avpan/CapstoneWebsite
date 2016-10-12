@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
-    <title>Hextech H-Z20 Predictive Model</title>
+	<script type="text/javascript" src="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.js"></script>
+	{{ script | safe }}
+	<title>Hextech H-Z20 Predictive Model</title>
 
     <!-- Bootstrap core CSS -->
     <link href="./static/bootstrap.min.css" rel="stylesheet">
@@ -42,6 +43,7 @@
             <li><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
             <li class="active"><a href="explore">Exploratory Analysis</a></li>
+            <li><a href="predictor">Predictor</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -51,8 +53,8 @@
 
       <div class="starter-template">
         <h1>Exploratory Analysis</h1>
-        <p class ="lead"><b>My code to explore data can be found at these Juypter Notebook links: <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook1</a> and <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook2</a></b></p>
-        <p class = "lead" align 'left'><b>If you would like to explore the distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
+        <!--<p class ="lead"><b>My code to explore data can be found at these Juypter Notebook links: <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook1</a> and <a href="https://github.com/avpan/hextechmodel/blob/master/data%20testing.ipynb">notebook2</a></b></p>-->
+        <p class = 'lead' align ='left'><b>If you would like to explore the distributions please select which feature and team you would like to see. This will take you to a separate page:</b></p>
         <form id='input' method='post' action='distfunc'>	
   			<p align ='center'>
                 <div>
@@ -109,10 +111,9 @@
             <p  align = 'left'>Next, I created a distribution of the gold difference between the winning and losing team at the end of a match. The mean gold difference = 11,090 gold. Below is a distribution of the gold difference,</p>   
             <p><img src="/static/pictures/golddiff.png" width="50%"></p>     
             <p  align = 'left'>The gold differences amoung the games is slightly scewed, but otherwise normal. Very rarely does a winning team have less gold than the losing. Just as we expected, the winning teams tend to have more gold leads at the end of a game, and it's interesting to see that the average gold lead is >10,000. This tells us that games tend to be won with complete domination over the losing team. A quesiton is raised, "Why aren't more games close (around 2000 gold difference)?</p> 
-            <p class = 'lead' align ='left'><b>Furthermore, if you would like to examine and interact with the averages of total gold earned by winning and losing teams and their gold differences as a function of the time within a game then follow the link <a href='/timeseries'>here</a></b></p>
         </div>       
-        <h3 align = 'left'>Naive Bayes</h3>
-        <p align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
+        <h2 align = 'left'>Naive Bayes</h2>
+        <p align='left'>Next I selected a few team features that can contribute to a victory in a game of League of Legends: gold total and difference, kill total and difference, tower kills and difference, inhibitor kills and difference, dragon kills and difference, baron kills and difference, rift herald kills, first baron, first blood, first tower, and first inhibitor. I wanted to see how accurate my data was in winning a game per individual feature. I ran a Naive Bayes model in order to calculate the accuracy. My results show</p>
         <table align = 'center'>
         {% for item in features %}
            <tr>
@@ -120,7 +121,7 @@
            </tr>
         {% endfor %}
         </table>
-        <p class = "important" align 'left'><b>If you would like to explore what features to show in scatter matrix please select which features you would like to see. This will take you to a separate page:</b></p>
+        <p class = 'lead' align ='left'><b>If you would like to explore what features to show in scatter matrix please select which features you would like to see. This will take you to a separate page:</b></p>
         <form id='input' method='post' action='scattermatrix'>	
              <div>
                 <select name="team">
@@ -163,8 +164,13 @@
 		<p align='left'>The top 4 accurate features are shown in a scatter matrix below</p>
         <p><img src="/static/pictures/scatter_matrix.png" width="70%"></p>
         <p  align = 'left'>We can see how the features relate to each other in a scatter matrix. There is large degree of collinearity between gold, kill, and tower difference. This is an issue for a linear regression. However, next steps are to combine these features into a random forest model. The forest model is less sensitive to collinearity. And a random forest model is useful as it can determine feature importance. I will then use a random forest to predict the winner of a game based on time intervals.</p>
-        </div>
+        <h2 align = 'left'>Time Series of Feature Averages</h2>
+        <div><p align ='left'><b>If you would like to examine and interact with the averages of certain features by winning and losing teams as a function of the time within a game then follow the link <a href='/timeseries'>here</a> and choose which features to explore.</b></p></div>
+        <h2 align='left'>Random Forest Model</h2>      
+        <iframe width="100%" frameborder="0" src="./templates/heatmap.html" height="400"></iframe>
 </div><!-- /.container -->
+
+
 
 
     <!-- Bootstrap core JavaScript

@@ -52,7 +52,7 @@
         <h1>Scatter Matrix</h1>
       <body align='center'>
         <div class=page>
-          <p><img src="./static/pictures/scatter_matrix_plot.png" width="70%"></p>
+          <p><img src="./static/pictures/scatter_matrix_plot.png" width="70%" id="scatter"></p>
         </div>
         <div>
             <form id='input' method='post' action='scattermatrix'>
@@ -96,7 +96,7 @@
              <script type="text/javascript">
                function updateImage() {
                     var d = new Date();
-                    document.getElementById("imageid").src="captcha_image.php?a="+d.getTime();
+                    document.getElementById("scatter").src="./static/pictures/scatter_matrix_plot.png?a="+d.getTime();
                     }
             </script>
              <input type="submit" value="Submit" onclick="updateImage()">

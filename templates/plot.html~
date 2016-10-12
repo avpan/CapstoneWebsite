@@ -8,18 +8,20 @@
     <meta name="description" content="">
     <meta name="author" content="Alexander Pan" >
     <link rel="icon" href="../../favicon.ico">
-
-    <title>Hextech H-Z20 Predictive Model</title>
+    <link rel="stylesheet" href="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.css" type="text/css" />
+    <script type="text/javascript" src="//cdn.pydata.org/bokeh/release/bokeh-0.12.0.min.js"></script>
+   
+	<title>Hextech H-Z20 Predictive Model</title>
 
     <!-- Bootstrap core CSS -->
     <link href="./static/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="./static/starter-template.css" rel="stylesheet">
+    <a href="/explore">Back to Exploratory</a>
 </head>
 
-  <body>
-
+  <body onload="updateImage()">
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -37,23 +39,28 @@
             <li><a href="game">How to play</a></li>
             <li><a href="about">About</a></li>
             <li><a href="contact">Contact</a></li>
-            <li class="active"><a href="technologies">Technologies</a></li>
+            <li><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
             <li><a href="explore">Exploratory Analysis</a></li>
-            <li><a href="predictor">Predictor</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
 
     <div class="container">
-
-      <div class="starter-template">
-        <h1>Technologies</h1>
-        <p class="lead">Magic! I'm a Wizard!</p>
-      </div>
-
-    </div><!-- /.container -->
+        <div class="starter-template">
+        <h1>Scatter Matrix</h1>
+      <body align='center'>
+        <div class=page>
+          <p><img src="./static/pictures/scatter_matrix_plot.png" width="70%" id="scatter"></p>
+        </div>
+        <div>
+            <form id='input' method='post' action='timeseries'>
+            </form>
+		</div>
+      </body>
+        </div>
+</div><!-- /.container -->
 
 
     <!-- Bootstrap core JavaScript

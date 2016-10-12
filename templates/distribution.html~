@@ -18,7 +18,7 @@
 
     <!-- Custom styles for this template -->
     <link href="./static/starter-template.css" rel="stylesheet">
-    <a href="/">Back to Exploratory</a>
+    <a href="/explore">Back to Exploratory</a>
 </head>
 
   <body>

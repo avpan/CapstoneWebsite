@@ -35,9 +35,9 @@
           <ul class="nav navbar-nav">
             <li><a href="/">Home</a></li>
             <li><a href="game">How to play</a></li>
-            <li><a href="about">About</a></li>
+            <li class="active"><a href="about">About</a></li>
             <li><a href="contact">Contact</a></li>
-            <li class="active"><a href="technologies">Technologies</a></li>
+            <li><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
             <li><a href="explore">Exploratory Analysis</a></li>
             <li><a href="predictor">Predictor</a></li>
@@ -49,9 +49,8 @@
     <div class="container">
 
       <div class="starter-template">
-        <h1>Technologies</h1>
-        <p class="lead">Magic! I'm a Wizard!</p>
-      </div>
+        <h1>Predictor</h1>
+        </div>
 
     </div><!-- /.container -->
 
