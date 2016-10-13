@@ -16,9 +16,6 @@
 
     <!-- Custom styles for this template -->
     <link href="./static/starter-template.css" rel="stylesheet">
-    input[type=submit] {
-        display: block
-    }
 </head>
 
   <body>
@@ -55,6 +52,8 @@
         <h1>Predictor</h1>
             <p class ='lead' align='center'>Please enter in the data for Blue and Red Teams</p>
              <form id='input' method='post' action='predictor'>	
+                <span>Time (nearest minute): </span>
+                 <input type="text" name="time" maxlength="2" size="2" value= 1 />
                 <h2 align='left'>Blue Team</h2>
                       <div align='left'>
                           <span>Gold Total: </span>
@@ -70,12 +69,12 @@
                           <span>Baron Nashors Killed: </span>
                           <input type="text" name="baronKills" id='blue' maxlength="2" size="2" value=0 />
                       </div>
-                      <div align = 'left'>
+                      <!--<div align = 'left'>
                         <input type="checkbox" name='firstBlood' value='blue'/>
                         <span style="width:100px;display:inline-block;">First Blood</span>
                         <input type="checkbox" name='firstTower' value='blue'/>
                         <span style="width:100px;display:inline-block;">First Tower</span>
-                      </div>
+                      </div>-->
                 <h2 align='left'>Red Team</h2>
                    <div align='left'>
                           <span>Gold Total: </span>
@@ -91,12 +90,12 @@
                           <span>Baron Nashors Killed: </span>
                           <input type="text" name="baronKills" id='red' maxlength="2" size="2" value=0 />
                       </div>
-                      <div align = 'left'>
+                      <!--<div align = 'left'>
                         <input type="checkbox" name='firstBlood' value='red'/>
                         <span style="width:100px;display:inline-block;">First Blood</span>
                         <input type="checkbox" name='firstTower' value='red'/>
                         <span style="width:100px;display:inline-block;">First Tower</span>
-                      </div>
+                      </div>-->
                  <h4 align = 'left'>Choose a team to predict their win percentage</h4>
                      <div align = 'left'>
                         <select name="predictTeam">
@@ -105,6 +104,15 @@
                      </div>
                   <input type="submit" value="Submit"/>
              </form>
+             <div align='left'>
+                <p class="lead">
+                     {% if error == '' %}
+                        <b>The team has a {{win_percent}} of winning</b>
+                     {%else%}
+                        <b>{{error}}</b>
+                     {% endif %}    
+                 </p>
+             </div>        
       </div>
     </div><!-- /.container -->
 

@@ -41,9 +41,6 @@ FEATURES = {"gameLength": 'Game Duration',
                     'firstTower': 'First Tower',
                     'firstInhibitor':'First Inhibitor'}
                     
-with open('./static/randomforestmodel_esports.pkl','rb') as infile:
-        forest = dill.load(infile)  
-        
 @app.route('/',methods=['GET','POST'])
 def main():
   return render_template('index.html')
@@ -431,7 +428,8 @@ def timeSeries():
             return render_template('timeseries.html',div=div,script=script)    
             
 @app.route('/predictor',methods=['GET'])
-def predictor():                          
+def predictor():     
+    error = ''                     
     return render_template('predictor.html')
 
 @app.route('/predictor',methods=['POST'])
@@ -443,33 +441,17 @@ def predictorPost():
     dragonKills = request.form.getlist('dragonKills')
     baronKills = request.form.getlist('baronKills')
     predictTeam = request.form.getlist('predictTeam')[0]
-    firstBlood = request.form.getlist('firstBlood')
-    firstTower = request.form.getlist('firstTower')
+    #firstBlood = request.form.getlist('firstBlood')
+    #firstTower = request.form.getlist('firstTower')
+    time = int(request.form.getlist('time')[0])
     #print request.form.getlist('firstBlood'), request.form.getlist('firstTower')
     if predictTeam == 'blue':
         team1 = 0
         team2 = 1
-        if firstBlood == 'blue':
-            firstBlood = 1
-        else:
-            firstBlood = 0
-        if firstTower == 'blue':
-            firstTower = 1
-        else:
-            firstTower = 0       
     else:
         team1 = 1
         team2 = 0
-        if firstBlood == 'red':
-            firstBlood = 1
-        else:
-            firstBlood = 0
-        if firstTower == 'red':
-            firstTower = 1
-        else:
-            firstTower = 0    
         
-    
     goldDiff = int(goldTotal[team1]) - int(goldTotal[team2])
     killDiff = int(champKills[team1]) - int(champKills[team2])
     towerDiff = int(towerKills[team1]) - int(towerKills[team2])
@@ -477,12 +459,22 @@ def predictorPost():
     dragonDiff = int(dragonKills[team1]) - int(dragonKills[team2])
     baronDiff = int(baronKills[team1]) - int(baronKills[team2])
     
-    features =[(goldTotal[team1],goldDiff,champKills[team1],killDiff,towerKills[team1],towerDiff,inhibKills[team1],inhibDiff,dragonKills[team1],dragonDiff,baronKills[team1],baronDiff,firstBlood,firstTower)]
-    features_df = pd.DataFrame(features,columns=['goldTotal','goldDiff','champKills','killDiff','towerKills','towerDiff','inhibKills','inhibDiff','dragonKills', 'dragonDiff','baronKills','baronDiff','firstBlood','firstTower'])
-    winner = forest.predict(features_df)
-    win_percent = forest.score(features_df,[1])
-    print win_percent,winner
-    return render_template('predictor.html')
+    features =[(goldTotal[team1],goldDiff,champKills[team1],killDiff,towerKills[team1],towerDiff,inhibKills[team1],inhibDiff,dragonKills[team1],dragonDiff,baronKills[team1],baronDiff)]
+    features_df = pd.DataFrame(features,columns=['goldTotal','goldDiff','champKills','killDiff','towerKills','towerDiff','inhibKills','inhibDiff','dragonKills', 'dragonDiff','baronKills','baronDiff'])
+    with open('./static/models/randomforestmodel_esports_%d.pkl'%time,'rb') as infile:
+        forest = dill.load(infile)  
+    score_df = pd.read_csv('./static/predictionaccuracy.csv',index_col=0) 
+    error = ''
+    if time > score_df.shape[0]:
+        return render_template('predictor.html',error="Game is too long for reliable prediction")
+    else:
+        win_percent = round(score_df.loc[time,'accuracyScore']*100,2)
+        winner = forest.predict(features_df)
+        if winner == 0:
+            win_percent = 100-win_percent
+            
+        print win_percent, message
+        return render_template('predictor.html',win_percent=win_percent,error=error)
 if __name__ == '__main__':
     #app.run()
     app.run(debug=True)
