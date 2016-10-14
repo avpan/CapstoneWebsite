@@ -17,6 +17,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import dill
+import zipfile
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -215,7 +216,7 @@ def scatterMatrix():
 
 @app.route('/timeseries',methods=['GET'])
 def timeSeriesDefault():    
-    df = pd.read_csv("./static/fulltimedata.csv",index_col=0)
+    df = pd.read_csv("./static/fulltimedata.csv.zip",index_col=0,compression='zip')
     df = df.astype(int)
     winner_df = df[df['winner'] == 1]
     loser_df = df[df['winner']== 0]
@@ -289,7 +290,7 @@ def timeSeriesDefault():
       
 @app.route('/timeseries',methods=['POST'])
 def timeSeries():
-    df = pd.read_csv("./static/fulltimedata.csv",index_col=0)
+    df = pd.read_csv("./static/fulltimedata.csv.zip",index_col=0,compression='zip')
     df = df.astype(int)
     winner_df = df[df['winner'] == 1]
     loser_df = df[df['winner']==0]
