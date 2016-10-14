@@ -140,7 +140,7 @@ def distFunc():
     metric = FEATURES[feature[0]]
     binwidth = int(bin[0])
     
-    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = pd.read_csv("./static/full_data.csv",index_col=0)
     df = df.astype(float)
     df.reset_index(inplace=True,drop=True)
     hist,edges = [],[]
@@ -183,7 +183,7 @@ def distFunc():
 
 @app.route('/scattermatrix',methods=['GET'])
 def scatterDefault():
-    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = pd.read_csv("./static/full_data.csv",index_col=0)
     df = df.astype(float)
     df.reset_index(inplace=True,drop=True)
     blue_team = df.iloc[::2]
@@ -464,7 +464,7 @@ def predictorPost():
     score_df = pd.read_csv('./static/predictionaccuracy.csv',index_col=0) 
     error = ''
     if time > score_df.shape[0]:
-        return render_template('predictor.html',error="Game is too long for reliable prediction")
+        return render_template('predictor.html',error="Game is too long for reliable prediction. It is up to the player's skills now.")
     else:
         with open('./static/models/randomforestmodel_esports_%d.pkl'%time,'rb') as infile:
             forest = dill.load(infile)  

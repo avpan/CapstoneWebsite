@@ -40,6 +40,7 @@
             <li class="active"><a href="technologies">Technologies</a></li>
             <li><a href="getdata">Data</a></li>
             <li><a href="explore">Exploratory Analysis</a></li>
+            <li><a href="predictor">Predictor</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -49,7 +50,14 @@
 
       <div class="starter-template">
         <h1>Technologies</h1>
-        <p class="lead">Magic! I'm a Wizard!</p>
+        <h2 align='left'>Python</h2>
+        <p class="lead" align = 'left'>Important Modules: MongoDB, LolCrawler, Pandas, Numpy, Bokeh</p>
+        <h2 align='left'>Visualizations</h2>
+        <p class = "lead" align='left'>Bokeh and Pandas</p>
+        <h2 align='left'>Webhosting</h2>
+        <p class = "lead" align='left'>Flask and Heroku</p>
+        <h2 align='left'>Machine Learning</h2>
+        <p class = "lead" align='left'>Naive Bayes and Random Forest</p>
       </div>
 
     </div><!-- /.container -->

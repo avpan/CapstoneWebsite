@@ -114,7 +114,7 @@ def distFuncDefault():
     metric = FEATURES['gameLength']
     binwidth = 50
     
-    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = pd.read_csv("./static/full_data.csv",index_col=0)
     df = df.astype(float)
     df.reset_index(inplace=True,drop=True)
     
@@ -140,7 +140,7 @@ def distFunc():
     metric = FEATURES[feature[0]]
     binwidth = int(bin[0])
     
-    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = pd.read_csv("./static/full_data.csv",index_col=0)
     df = df.astype(float)
     df.reset_index(inplace=True,drop=True)
     hist,edges = [],[]
@@ -183,7 +183,7 @@ def distFunc():
 
 @app.route('/scattermatrix',methods=['GET'])
 def scatterDefault():
-    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = pd.read_csv("./static/full_data.csv",index_col=0)
     df = df.astype(float)
     df.reset_index(inplace=True,drop=True)
     blue_team = df.iloc[::2]
@@ -193,7 +193,7 @@ def scatterDefault():
       
 @app.route('/scattermatrix',methods=['POST'])
 def scatterMatrix():
-    df = pd.read_csv("./static/prelim_data.csv",index_col=0)
+    df = pd.read_csv("./static/full_data.csv",index_col=0)
     df = df.astype(float)
     df.reset_index(inplace=True,drop=True)
     
@@ -215,7 +215,7 @@ def scatterMatrix():
 
 @app.route('/timeseries',methods=['GET'])
 def timeSeriesDefault():    
-    df = pd.read_csv("./static/prelim_fulltimedata.csv",index_col=0)
+    df = pd.read_csv("./static/fulltimedata.csv",index_col=0)
     df = df.astype(int)
     winner_df = df[df['winner'] == 1]
     loser_df = df[df['winner']== 0]
@@ -289,7 +289,7 @@ def timeSeriesDefault():
       
 @app.route('/timeseries',methods=['POST'])
 def timeSeries():
-    df = pd.read_csv("./static/prelim_fulltimedata.csv",index_col=0)
+    df = pd.read_csv("./static/fulltimedata.csv",index_col=0)
     df = df.astype(int)
     winner_df = df[df['winner'] == 1]
     loser_df = df[df['winner']==0]
