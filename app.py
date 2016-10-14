@@ -13,11 +13,10 @@ from bokeh.embed import file_html
 import requests
 import pandas as pd
 import csv
-import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import dill
-import zipfile
+
 
 app = Flask(__name__)
 Bootstrap(app)
