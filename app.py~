@@ -107,7 +107,7 @@ def explore():
         p.line(score_df['time'],score_df['accuracyScore'],line_width=2,color='mediumpurple')
         p.circle(score_df['time'],score_df['accuracyScore'],color='indigo',size=5)
         script, div = components(p)
-        return render_template('explore.html', plot=html,script=script,div=div)    
+        return render_template('explore.html', plot=html,script=script,div=div, features=features)    
 
 @app.route('/distfunc',methods=['GET'])
 def distFuncDefault():

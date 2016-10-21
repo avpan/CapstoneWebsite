@@ -215,7 +215,7 @@ def scatterMatrix():
 
 @app.route('/timeseries',methods=['GET'])
 def timeSeriesDefault():    
-    df = pd.read_csv("./static/fulltimedata.csv.zip",index_col=0,compression='zip')
+    df = pd.read_csv("./static/prelim_fulltimedata.csv.zip",index_col=0,compression='zip')
     df = df.astype(int)
     winner_df = df[df['winner'] == 1]
     loser_df = df[df['winner']== 0]
